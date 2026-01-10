@@ -1,0 +1,18 @@
+{
+  "arena": {
+    "title": "竞技场",
+    "description": "并排比较多个 AI 模型，实时流式响应。",
+    "panels": "面板",
+    "addPanel": "添加面板",
+    "panelCount": "{{count}} / {{max}} 个面板",
+    "selectModel": "选择模型",
+    "waitingForInput": "等待输入...",
+    "latency": "延迟",
+    "tokens": "令牌",
+    "estimatedCost": "预估成本",
+    "clearAll": "清空全部",
+    "inputPlaceholder": "输入消息以比较模型...",
+    "compare": "比较"
+  },
+  "stop": "停止"
+}

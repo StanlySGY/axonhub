@@ -13,6 +13,7 @@ import {
   IconAB2,
   IconBaselineDensityMedium,
   IconAi,
+  IconScale,
 } from '@tabler/icons-react';
 import { Command } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -148,6 +149,11 @@ export function useSidebarData(): SidebarData {
           title: t('sidebar.items.playground'),
           url: '/project/playground',
           icon: IconRobot,
+        } as NavLink,
+        {
+          title: t('sidebar.items.arena'),
+          url: '/project/arena',
+          icon: IconScale,
         } as NavLink,
       ],
     },

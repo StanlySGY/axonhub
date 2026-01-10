@@ -1,0 +1,18 @@
+{
+  "arena": {
+    "title": "Arena",
+    "description": "Compare multiple AI models side by side with real-time streaming responses.",
+    "panels": "Panels",
+    "addPanel": "Add Panel",
+    "panelCount": "{{count}} of {{max}} panels",
+    "selectModel": "Select model",
+    "waitingForInput": "Waiting for input...",
+    "latency": "Latency",
+    "tokens": "Tokens",
+    "estimatedCost": "Est. Cost",
+    "clearAll": "Clear All",
+    "inputPlaceholder": "Type a message to compare models...",
+    "compare": "Compare"
+  },
+  "stop": "Stop"
+}

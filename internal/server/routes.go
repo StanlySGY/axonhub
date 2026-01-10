@@ -17,6 +17,7 @@ import (
 type Handlers struct {
 	fx.In
 
+	Arena      *api.ArenaHandlers
 	Graphql    *gql.GraphqlHandler
 	OpenAI     *api.OpenAIHandlers
 	Anthropic  *api.AnthropicHandlers
@@ -93,6 +94,14 @@ func SetupRoutes(server *Server, handlers Handlers, client *ent.Client, services
 			middleware.WithTimeout(server.Config.LLMRequestTimeout),
 			middleware.WithSource(request.SourcePlayground),
 			handlers.Playground.ChatCompletion,
+		)
+
+		// AxonArena API - parallel multi-channel comparison
+		adminGroup.POST(
+			"/arena/compare",
+			middleware.WithTimeout(server.Config.LLMRequestTimeout),
+			middleware.WithSource(request.SourcePlayground),
+			handlers.Arena.Compare,
 		)
 	}
 
