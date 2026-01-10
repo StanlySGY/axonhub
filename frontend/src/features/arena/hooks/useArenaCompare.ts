@@ -15,12 +15,14 @@ export function useArenaCompare() {
     globalTemperature,
     globalMaxTokens,
     messages,
+    panelStates,
     setIsComparing,
     setPanelState,
     appendPanelContent,
     setPanelMetrics,
     setPanelError,
     addUserMessage,
+    addPanelMessage,
     resetPanelStates,
   } = useArenaStore();
 
@@ -35,6 +37,11 @@ export function useArenaCompare() {
       addUserMessage(userInput);
       resetPanelStates();
       setIsComparing(true);
+
+      // Add user message to each valid panel's history
+      validPanels.forEach((p) => {
+        addPanelMessage(p.id, { role: 'user', content: userInput });
+      });
 
       validPanels.forEach((p) => {
         setPanelState(p.id, { isStreaming: true, content: '', error: null, metrics: null });
@@ -120,6 +127,11 @@ export function useArenaCompare() {
                   const metrics = data as ArenaSSEMetrics;
                   const panelId = channelIndexToId.get(metrics.channel_index);
                   if (panelId) {
+                    // Save assistant response to history before setting metrics
+                    const currentContent = useArenaStore.getState().panelStates[panelId]?.content;
+                    if (currentContent) {
+                      addPanelMessage(panelId, { role: 'assistant', content: currentContent });
+                    }
                     setPanelMetrics(panelId, metrics.metrics);
                   }
                 }
@@ -147,6 +159,7 @@ export function useArenaCompare() {
       accessToken,
       selectedProjectId,
       addUserMessage,
+      addPanelMessage,
       resetPanelStates,
       setIsComparing,
       setPanelState,

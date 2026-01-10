@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { AutoCompleteSelect } from '@/components/auto-complete-select';
 import { Conversation, ConversationContent, ConversationScrollButton } from '@/components/ai-elements/conversation';
+import { Message, MessageContent } from '@/components/ai-elements/message';
 import { Response as UIResponse } from '@/components/ai-elements/response';
 import { Loader } from '@/components/ai-elements/loader';
 import { useQueryChannels } from '@/features/channels/data/channels';
@@ -50,6 +51,9 @@ export function ArenaPanel({ panel, state, canRemove }: ArenaPanelProps) {
   const content = state?.content ?? '';
   const error = state?.error ?? null;
   const metrics = state?.metrics ?? null;
+  const messages = state?.messages ?? [];
+
+  const hasContent = messages.length > 0 || content || isStreaming;
 
   return (
     <div className="bg-card border-border flex h-full flex-col rounded-xl border">
@@ -75,10 +79,24 @@ export function ArenaPanel({ panel, state, canRemove }: ArenaPanelProps) {
         <ConversationContent className="gap-4 p-4">
           {error ? (
             <div className="text-destructive rounded-lg bg-red-50 p-3 text-sm dark:bg-red-950/20">{error}</div>
-          ) : content ? (
-            <UIResponse>{content}</UIResponse>
-          ) : isStreaming ? (
-            <Loader />
+          ) : hasContent ? (
+            <>
+              {messages.map((msg, idx) => (
+                <Message key={idx} from={msg.role}>
+                  <MessageContent>
+                    <UIResponse>{msg.content}</UIResponse>
+                  </MessageContent>
+                </Message>
+              ))}
+              {content && (
+                <Message from="assistant">
+                  <MessageContent>
+                    <UIResponse>{content}</UIResponse>
+                  </MessageContent>
+                </Message>
+              )}
+              {isStreaming && !content && <Loader />}
+            </>
           ) : (
             <div className="text-muted-foreground flex h-full items-center justify-center text-sm">
               {t('arena.waitingForInput')}

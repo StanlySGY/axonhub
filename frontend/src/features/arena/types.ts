@@ -14,11 +14,17 @@ export interface ArenaMetrics {
   estimated_cost?: number;
 }
 
+export interface ArenaPanelMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 export interface ArenaPanelState {
   content: string;
   isStreaming: boolean;
   error: string | null;
   metrics: ArenaMetrics | null;
+  messages: ArenaPanelMessage[];
 }
 
 export interface ArenaSSEMeta {

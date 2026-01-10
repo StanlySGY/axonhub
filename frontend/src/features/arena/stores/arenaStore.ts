@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { ArenaPanelConfig, ArenaPanelState, ArenaMetrics } from '../types';
+import type { ArenaPanelConfig, ArenaPanelState, ArenaMetrics, ArenaPanelMessage } from '../types';
 
 interface ArenaStore {
   panels: ArenaPanelConfig[];
@@ -17,6 +17,7 @@ interface ArenaStore {
   appendPanelContent: (id: string, content: string) => void;
   setPanelMetrics: (id: string, metrics: ArenaMetrics) => void;
   setPanelError: (id: string, error: string) => void;
+  addPanelMessage: (id: string, message: ArenaPanelMessage) => void;
   setGlobalSystemPrompt: (prompt: string) => void;
   setGlobalTemperature: (temp: number) => void;
   setGlobalMaxTokens: (tokens: number) => void;
@@ -38,6 +39,7 @@ const createDefaultPanelState = (): ArenaPanelState => ({
   isStreaming: false,
   error: null,
   metrics: null,
+  messages: [],
 });
 
 export const useArenaStore = create<ArenaStore>((set, get) => ({
@@ -117,6 +119,18 @@ export const useArenaStore = create<ArenaStore>((set, get) => ({
     });
   },
 
+  addPanelMessage: (id, message) => {
+    set((state) => {
+      const current = state.panelStates[id] || createDefaultPanelState();
+      return {
+        panelStates: {
+          ...state.panelStates,
+          [id]: { ...current, messages: [...current.messages, message] },
+        },
+      };
+    });
+  },
+
   setGlobalSystemPrompt: (prompt) => set({ globalSystemPrompt: prompt }),
   setGlobalTemperature: (temp) => set({ globalTemperature: temp }),
   setGlobalMaxTokens: (tokens) => set({ globalMaxTokens: tokens }),
@@ -131,10 +145,14 @@ export const useArenaStore = create<ArenaStore>((set, get) => ({
   clearMessages: () => set({ messages: [], panelStates: {} }),
 
   resetPanelStates: () => {
-    const { panels } = get();
+    const { panels, panelStates } = get();
     const newStates: Record<string, ArenaPanelState> = {};
     panels.forEach((p) => {
-      newStates[p.id] = createDefaultPanelState();
+      const existing = panelStates[p.id];
+      newStates[p.id] = {
+        ...createDefaultPanelState(),
+        messages: existing?.messages || [],
+      };
     });
     set({ panelStates: newStates });
   },
