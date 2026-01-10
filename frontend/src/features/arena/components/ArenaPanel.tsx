@@ -2,9 +2,8 @@ import { useMemo, useCallback } from 'react';
 import { X, Clock, Zap, Coins } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { AutoCompleteSelect } from '@/components/auto-complete-select';
+import { Conversation, ConversationContent, ConversationScrollButton } from '@/components/ai-elements/conversation';
 import { Response as UIResponse } from '@/components/ai-elements/response';
 import { Loader } from '@/components/ai-elements/loader';
 import { useQueryChannels } from '@/features/channels/data/channels';
@@ -72,19 +71,22 @@ export function ArenaPanel({ panel, state, canRemove }: ArenaPanelProps) {
         )}
       </div>
 
-      <ScrollArea className="flex-1 p-4">
-        {error ? (
-          <div className="text-destructive rounded-lg bg-red-50 p-3 text-sm dark:bg-red-950/20">{error}</div>
-        ) : content ? (
-          <UIResponse>{content}</UIResponse>
-        ) : isStreaming ? (
-          <Loader />
-        ) : (
-          <div className="text-muted-foreground flex h-full items-center justify-center text-sm">
-            {t('arena.waitingForInput')}
-          </div>
-        )}
-      </ScrollArea>
+      <Conversation className="flex-1">
+        <ConversationContent className="gap-4 p-4">
+          {error ? (
+            <div className="text-destructive rounded-lg bg-red-50 p-3 text-sm dark:bg-red-950/20">{error}</div>
+          ) : content ? (
+            <UIResponse>{content}</UIResponse>
+          ) : isStreaming ? (
+            <Loader />
+          ) : (
+            <div className="text-muted-foreground flex h-full items-center justify-center text-sm">
+              {t('arena.waitingForInput')}
+            </div>
+          )}
+        </ConversationContent>
+        <ConversationScrollButton />
+      </Conversation>
 
       {metrics && (
         <div className="border-t p-3">
