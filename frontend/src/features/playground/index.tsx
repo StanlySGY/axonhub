@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { IconTrash, IconRefresh } from '@tabler/icons-react';
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
@@ -21,7 +21,7 @@ import { PromptInput, PromptInputTextarea, PromptInputSubmit } from '@/component
 import { Reasoning, ReasoningTrigger, ReasoningContent } from '@/components/ai-elements/reasoning';
 import { Response as UIResponse } from '@/components/ai-elements/response';
 import { AutoCompleteSelect } from '@/components/auto-complete-select';
-import { useQueryChannels } from '@/features/channels/data/channels';
+import { useChannelModels } from '@/hooks/use-channel-models';
 
 export default function Playground() {
   const { t } = useTranslation();
@@ -62,15 +62,7 @@ export default function Playground() {
 
   const { accessToken } = useAuthStore((state) => state.auth);
   const selectedProjectId = useSelectedProjectId();
-
-  // 获取 channels 数据
-  const { data: channelsData, isLoading: channelsLoading } = useQueryChannels({
-    first: 100,
-    orderBy: { field: 'ORDERING_WEIGHT', direction: 'DESC' },
-    where: {
-      statusIn: ['enabled', 'disabled'],
-    },
-  });
+  const { modelOptions, isLoading: channelsLoading } = useChannelModels();
 
   const [input, setInput] = useState('');
 
@@ -203,29 +195,6 @@ export default function Playground() {
     }
   }, [messages, regenerate, setMessages]);
 
-  // 获取按 channel 分组的模型列表
-  const groupedModels = useMemo(() => {
-    if (!channelsData?.edges) return [];
-
-    const channelGroups = channelsData.edges.map((edge) => ({
-      channelName: edge.node.name,
-      channelType: edge.node.type,
-      models: edge.node.supportedModels.map((model) => ({
-        value: edge.node.id + '|' + model,
-        label: model,
-        channel: edge.node,
-      })),
-    }));
-
-    return channelGroups.filter((group) => group.models.length > 0);
-  }, [channelsData]);
-
-  // 为选择准备的平面化模型项（value: channelId|model, label: "model — channel"）
-  const modelOptions = useMemo(
-    () => groupedModels.flatMap((group) => group.models.map((m) => ({ value: m.value, label: `${group.channelName} - ${m.label}` }))),
-    [groupedModels]
-  );
-
   // 处理模型选择，同时设置对应的 channel
   const handleModelChange = useCallback(
     (newModel: string) => {
@@ -238,10 +207,10 @@ export default function Playground() {
   );
 
   useEffect(() => {
-    if (!selectedGroupModel && groupedModels.length > 0 && groupedModels[0].models.length > 0) {
-      handleModelChange(groupedModels[0].models[0].value);
+    if (!selectedGroupModel && modelOptions.length > 0) {
+      handleModelChange(modelOptions[0].value);
     }
-  }, [groupedModels, handleModelChange, selectedGroupModel]);
+  }, [modelOptions, handleModelChange, selectedGroupModel]);
 
   return (
     <TooltipProvider>

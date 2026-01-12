@@ -1,13 +1,15 @@
 import { useMemo, useCallback } from 'react';
-import { X, Clock, Zap, Coins } from 'lucide-react';
+import { X, Clock, Zap, Coins, Copy } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { AutoCompleteSelect } from '@/components/auto-complete-select';
 import { Conversation, ConversationContent, ConversationScrollButton } from '@/components/ai-elements/conversation';
 import { Message, MessageContent } from '@/components/ai-elements/message';
 import { Response as UIResponse } from '@/components/ai-elements/response';
 import { Loader } from '@/components/ai-elements/loader';
-import { useQueryChannels } from '@/features/channels/data/channels';
+import { Actions, Action } from '@/components/ai-elements/actions';
+import { useChannelModels } from '@/hooks/use-channel-models';
 import { useArenaStore } from '../stores/arenaStore';
 import type { ArenaPanelConfig, ArenaPanelState } from '../types';
 
@@ -20,22 +22,7 @@ interface ArenaPanelProps {
 export function ArenaPanel({ panel, state, canRemove }: ArenaPanelProps) {
   const { t } = useTranslation();
   const { updatePanel, removePanel } = useArenaStore();
-
-  const { data: channelsData, isLoading: channelsLoading } = useQueryChannels({
-    first: 100,
-    orderBy: { field: 'ORDERING_WEIGHT', direction: 'DESC' },
-    where: { statusIn: ['enabled', 'disabled'] },
-  });
-
-  const modelOptions = useMemo(() => {
-    if (!channelsData?.edges) return [];
-    return channelsData.edges.flatMap((edge) =>
-      edge.node.supportedModels.map((model) => ({
-        value: `${edge.node.id}|${model}`,
-        label: `${edge.node.name} - ${model}`,
-      }))
-    );
-  }, [channelsData]);
+  const { modelOptions, isLoading: channelsLoading } = useChannelModels();
 
   const selectedValue = panel.channelId && panel.model ? `${panel.channelId}|${panel.model}` : '';
 
@@ -92,6 +79,17 @@ export function ArenaPanel({ panel, state, canRemove }: ArenaPanelProps) {
                 <Message from="assistant">
                   <MessageContent>
                     <UIResponse>{content}</UIResponse>
+                    <Actions className="mt-2">
+                      <Action
+                        onClick={() => {
+                          navigator.clipboard.writeText(content);
+                          toast.success(t('copy'));
+                        }}
+                        label={t('copy')}
+                      >
+                        <Copy className="size-3" />
+                      </Action>
+                    </Actions>
                   </MessageContent>
                 </Message>
               )}
