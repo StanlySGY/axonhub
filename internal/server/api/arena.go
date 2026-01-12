@@ -44,6 +44,7 @@ type ArenaHandlersParams struct {
 	RequestService  *biz.RequestService
 	SystemService   *biz.SystemService
 	UsageLogService *biz.UsageLogService
+	PromptService   *biz.PromptService
 	HttpClient      *httpclient.HttpClient
 }
 
@@ -65,6 +66,7 @@ func NewArenaHandlers(params ArenaHandlersParams) *ArenaHandlers {
 			openaitransformer.NewInboundTransformer(),
 			params.SystemService,
 			params.UsageLogService,
+			params.PromptService,
 		),
 	}
 }
