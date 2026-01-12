@@ -23,6 +23,7 @@ type OpenAIHandlersParams struct {
 	RequestService  *biz.RequestService
 	SystemService   *biz.SystemService
 	UsageLogService *biz.UsageLogService
+	PromptService   *biz.PromptService
 	HttpClient      *httpclient.HttpClient
 }
 
@@ -46,6 +47,7 @@ func NewOpenAIHandlers(params OpenAIHandlersParams) *OpenAIHandlers {
 				openai.NewInboundTransformer(),
 				params.SystemService,
 				params.UsageLogService,
+				params.PromptService,
 			),
 		},
 		ResponseCompletionHandlers: &ChatCompletionHandlers{
@@ -57,6 +59,7 @@ func NewOpenAIHandlers(params OpenAIHandlersParams) *OpenAIHandlers {
 				responses.NewInboundTransformer(),
 				params.SystemService,
 				params.UsageLogService,
+				params.PromptService,
 			),
 		},
 		EmbeddingHandlers: &ChatCompletionHandlers{
@@ -68,6 +71,7 @@ func NewOpenAIHandlers(params OpenAIHandlersParams) *OpenAIHandlers {
 				openai.NewEmbeddingInboundTransformer(),
 				params.SystemService,
 				params.UsageLogService,
+				params.PromptService,
 			),
 		},
 		ChannelService: params.ChannelService,
@@ -90,6 +94,7 @@ func (handlers *OpenAIHandlers) CreateEmbedding(c *gin.Context) {
 
 type OpenAIModel struct {
 	ID      string `json:"id"`
+	Object  string `json:"object"`
 	Created int64  `json:"created"`
 	OwnedBy string `json:"owned_by"`
 }
@@ -121,6 +126,7 @@ func (handlers *OpenAIHandlers) ListModels(c *gin.Context) {
 	for _, model := range models {
 		openaiModels = append(openaiModels, OpenAIModel{
 			ID:      model.ID,
+			Object:  "model",
 			Created: model.Created,
 			OwnedBy: model.OwnedBy,
 		})

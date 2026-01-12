@@ -144,3 +144,5 @@ scripts/migration-test/
 tools
 
 .ace-tool/
+mise.toml
+locales_backup

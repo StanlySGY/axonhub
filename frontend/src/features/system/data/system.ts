@@ -478,6 +478,23 @@ const UPDATE_MODEL_SETTINGS_MUTATION = `
   }
 `;
 
+const CHANNEL_SETTINGS_QUERY = `
+  query SystemChannelSettings {
+    systemChannelSettings {
+      probe {
+        enabled
+        frequency
+      }
+    }
+  }
+`;
+
+const UPDATE_CHANNEL_SETTINGS_MUTATION = `
+  mutation UpdateChannelSettings($input: UpdateSystemChannelSettingsInput!) {
+    updateSystemChannelSettings(input: $input)
+  }
+`;
+
 export interface ModelSettings {
   fallbackToChannelsOnModelNotFound: boolean;
   queryAllChannelModels: boolean;
@@ -523,6 +540,62 @@ export function useUpdateModelSettings() {
   });
 }
 
+export type ProbeFrequency = 'ONE_MINUTE' | 'FIVE_MINUTES' | 'THIRTY_MINUTES' | 'ONE_HOUR';
+
+export interface ChannelProbeSetting {
+  enabled: boolean;
+  frequency: ProbeFrequency;
+}
+
+export interface ChannelSetting {
+  probe: ChannelProbeSetting;
+}
+
+export interface UpdateChannelProbeSettingInput {
+  enabled?: boolean;
+  frequency?: ProbeFrequency;
+}
+
+export interface UpdateSystemChannelSettingsInput {
+  probe?: UpdateChannelProbeSettingInput;
+}
+
+export function useChannelSetting() {
+  const { handleError } = useErrorHandler();
+
+  return useQuery({
+    queryKey: ['channelSetting'],
+    queryFn: async () => {
+      try {
+        const data = await graphqlRequest<{ systemChannelSettings: ChannelSetting }>(CHANNEL_SETTINGS_QUERY);
+        return data.systemChannelSettings;
+      } catch (error) {
+        handleError(error, i18n.t('common.errors.internalServerError'));
+        throw error;
+      }
+    },
+  });
+}
+
+export function useUpdateChannelSetting() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (input: UpdateSystemChannelSettingsInput) => {
+      const data = await graphqlRequest<{ updateSystemChannelSettings: boolean }>(UPDATE_CHANNEL_SETTINGS_MUTATION, { input });
+      return data.updateSystemChannelSettings;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['channelSetting'] });
+      queryClient.invalidateQueries({ queryKey: ['channelProbeData'] });
+      toast.success(i18n.t('common.success.systemUpdated'));
+    },
+    onError: () => {
+      toast.error(i18n.t('common.errors.systemUpdateFailed'));
+    },
+  });
+}
+
 // Backup and Restore
 const BACKUP_MUTATION = `
   mutation Backup($input: BackupOptionsInput!) {
@@ -546,6 +619,7 @@ const RESTORE_MUTATION = `
 export interface BackupOptionsInput {
   includeChannels: boolean;
   includeModels: boolean;
+  includeAPIKeys: boolean;
 }
 
 export interface BackupPayload {
@@ -557,8 +631,10 @@ export interface BackupPayload {
 export interface RestoreOptionsInput {
   includeChannels: boolean;
   includeModels: boolean;
+  includeAPIKeys: boolean;
   channelConflictStrategy: 'SKIP' | 'OVERWRITE' | 'ERROR';
   modelConflictStrategy: 'SKIP' | 'OVERWRITE' | 'ERROR';
+  apiKeyConflictStrategy: 'SKIP' | 'OVERWRITE' | 'ERROR';
 }
 
 export interface RestorePayload {

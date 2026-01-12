@@ -22,6 +22,7 @@ type AnthropicHandlersParams struct {
 	RequestService  *biz.RequestService
 	SystemService   *biz.SystemService
 	UsageLogService *biz.UsageLogService
+	PromptService   *biz.PromptService
 	HttpClient      *httpclient.HttpClient
 }
 
@@ -43,6 +44,7 @@ func NewAnthropicHandlers(params AnthropicHandlersParams) *AnthropicHandlers {
 				anthropic.NewInboundTransformer(),
 				params.SystemService,
 				params.UsageLogService,
+				params.PromptService,
 			),
 		},
 		ChannelService: params.ChannelService,
@@ -57,6 +59,7 @@ func (handlers *AnthropicHandlers) CreateMessage(c *gin.Context) {
 
 type AnthropicModel struct {
 	ID          string    `json:"id"`
+	Type        string    `json:"type"`
 	DisplayName string    `json:"display_name"`
 	CreatedAt   time.Time `json:"created"`
 }
@@ -86,6 +89,7 @@ func (handlers *AnthropicHandlers) ListModels(c *gin.Context) {
 	for _, model := range models {
 		anthropicModels = append(anthropicModels, AnthropicModel{
 			ID:          model.ID,
+			Type:        "model",
 			DisplayName: model.DisplayName,
 			CreatedAt:   model.CreatedAt,
 		})

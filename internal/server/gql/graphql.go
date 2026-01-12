@@ -19,9 +19,11 @@ import (
 	"github.com/looplj/axonhub/internal/ent/channel"
 	"github.com/looplj/axonhub/internal/ent/channeloverridetemplate"
 	"github.com/looplj/axonhub/internal/ent/channelperformance"
+	"github.com/looplj/axonhub/internal/ent/channelprobe"
 	"github.com/looplj/axonhub/internal/ent/datastorage"
 	"github.com/looplj/axonhub/internal/ent/model"
 	"github.com/looplj/axonhub/internal/ent/project"
+	"github.com/looplj/axonhub/internal/ent/prompt"
 	"github.com/looplj/axonhub/internal/ent/request"
 	"github.com/looplj/axonhub/internal/ent/requestexecution"
 	"github.com/looplj/axonhub/internal/ent/role"
@@ -54,6 +56,8 @@ type Dependencies struct {
 	ChannelOverrideTemplateService *biz.ChannelOverrideTemplateService
 	ModelService                   *biz.ModelService
 	BackupService                  *biz.BackupService
+	ChannelProbeService            *biz.ChannelProbeService
+	PromptService                  *biz.PromptService
 }
 
 type GraphqlHandler struct {
@@ -80,6 +84,8 @@ func NewGraphqlHandlers(deps Dependencies) *GraphqlHandler {
 			deps.ChannelOverrideTemplateService,
 			deps.ModelService,
 			deps.BackupService,
+			deps.ChannelProbeService,
+			deps.PromptService,
 		),
 	)
 
@@ -116,6 +122,7 @@ var guidTypeToNodeType = map[string]string{
 	ent.TypeModel:                   model.Table,
 	ent.TypeChannel:                 channel.Table,
 	ent.TypeChannelPerformance:      channelperformance.Table,
+	ent.TypeChannelProbe:            channelprobe.Table,
 	ent.TypeChannelOverrideTemplate: channeloverridetemplate.Table,
 	ent.TypeRequest:                 request.Table,
 	ent.TypeRequestExecution:        requestexecution.Table,
@@ -128,6 +135,7 @@ var guidTypeToNodeType = map[string]string{
 	ent.TypeThread:                  thread.Table,
 	ent.TypeTrace:                   trace.Table,
 	ent.TypeDataStorage:             datastorage.Table,
+	ent.TypePrompt:                  prompt.Table,
 }
 
 const maxPaginationLimit = 1000
