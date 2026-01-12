@@ -18,5 +18,7 @@ export function useChannelModels() {
     );
   }, [channelsData]);
 
-  return { modelOptions, isLoading };
+  const channelCount = channelsData?.edges?.length ?? 0;
+
+  return { modelOptions, isLoading, channelCount };
 }

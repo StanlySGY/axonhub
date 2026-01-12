@@ -62,7 +62,7 @@ export default function Playground() {
 
   const { accessToken } = useAuthStore((state) => state.auth);
   const selectedProjectId = useSelectedProjectId();
-  const { modelOptions, isLoading: channelsLoading } = useChannelModels();
+  const { modelOptions, isLoading: channelsLoading, channelCount } = useChannelModels();
 
   const [input, setInput] = useState('');
 
@@ -257,7 +257,7 @@ export default function Playground() {
                   <p className='text-muted-foreground text-[10px]'>
                     {t('playground.modelsAvailable', {
                       count: modelOptions.length,
-                      channels: groupedModels.length,
+                      channels: channelCount,
                     })}
                   </p>
                 )}
