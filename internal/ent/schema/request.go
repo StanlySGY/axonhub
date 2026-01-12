@@ -37,6 +37,8 @@ func (Request) Indexes() []ent.Index {
 			StorageKey("requests_by_created_at"),
 		index.Fields("status").
 			StorageKey("requests_by_status"),
+		index.Fields("model_id").
+			StorageKey("requests_by_model_id"),
 	}
 }
 

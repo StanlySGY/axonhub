@@ -349,6 +349,11 @@ var (
 				Unique:  false,
 				Columns: []*schema.Column{RequestsColumns[11]},
 			},
+			{
+				Name:    "requests_by_model_id",
+				Unique:  false,
+				Columns: []*schema.Column{RequestsColumns[4]},
+			},
 		},
 	}
 	// RequestExecutionsColumns holds the columns for the "request_executions" table.
