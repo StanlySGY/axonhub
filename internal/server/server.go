@@ -18,11 +18,17 @@ import (
 	"github.com/looplj/axonhub/internal/server/gql"
 	"github.com/looplj/axonhub/internal/server/middleware"
 	"github.com/looplj/axonhub/internal/tracing"
+	"github.com/looplj/axonhub/llm/httpclient"
 )
 
 func New(config Config) *Server {
 	if !config.Debug {
 		gin.SetMode(gin.ReleaseMode)
+	}
+
+	// Configure max body size for request reading
+	if config.MaxBodySize > 0 {
+		httpclient.SetMaxBodySize(config.MaxBodySize)
 	}
 
 	engine := gin.New()

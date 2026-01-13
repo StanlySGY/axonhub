@@ -65,7 +65,7 @@ func WriteJSONStream(c *gin.Context, stream streams.Stream[*httpclient.StreamEve
 	c.Header("Content-Type", "text/plain; charset=utf-8")
 	c.Header("Cache-Control", "no-cache")
 	c.Header("Connection", "keep-alive")
-	c.Header("Access-Control-Allow-Origin", "*")
+	SetSSECORSHeaders(c)
 	c.Header("X-Vercel-AI-Data-Stream", "v1")
 
 	for {

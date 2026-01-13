@@ -89,7 +89,7 @@ func (handlers *ChatCompletionHandlers) ChatCompletion(c *gin.Context) {
 			}
 		}()
 
-		c.Header("Access-Control-Allow-Origin", "*")
+		SetSSECORSHeaders(c)
 
 		streamWriter := handlers.StreamWriter
 		if streamWriter == nil {

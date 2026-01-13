@@ -178,7 +178,7 @@ func (handlers *ArenaHandlers) Compare(c *gin.Context) {
 	c.Header("Content-Type", sse.ContentType)
 	c.Header("Cache-Control", "no-cache")
 	c.Header("Connection", "keep-alive")
-	c.Header("Access-Control-Allow-Origin", "*")
+	SetSSECORSHeaders(c)
 	c.Status(http.StatusOK)
 	c.Writer.Flush()
 

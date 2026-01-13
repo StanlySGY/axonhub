@@ -6,6 +6,9 @@ import (
 	"github.com/looplj/axonhub/internal/tracing"
 )
 
+// DefaultMaxBodySize is the default maximum request body size (32MB)
+const DefaultMaxBodySize int64 = 32 << 20
+
 type Config struct {
 	Port        int           `conf:"port" yaml:"port" json:"port"`
 	Name        string        `conf:"name" yaml:"name" json:"name"`
@@ -18,10 +21,21 @@ type Config struct {
 	// LLMRequestTimeout is the maximum duration for processing a request to LLM.
 	LLMRequestTimeout time.Duration `conf:"llm_request_timeout" yaml:"llm_request_timeout" json:"llm_request_timeout"`
 
+	// MaxBodySize is the maximum request body size in bytes (default: 32MB)
+	MaxBodySize int64 `conf:"max_body_size" yaml:"max_body_size" json:"max_body_size"`
+
 	Trace tracing.Config `conf:"trace" yaml:"trace" json:"trace"`
 
 	Debug bool `conf:"debug" yaml:"debug" json:"debug"`
 	CORS  CORS `conf:"cors" yaml:"cors" json:"cors"`
+}
+
+// GetMaxBodySize returns the configured max body size or the default value
+func (c *Config) GetMaxBodySize() int64 {
+	if c.MaxBodySize <= 0 {
+		return DefaultMaxBodySize
+	}
+	return c.MaxBodySize
 }
 
 type CORS struct {

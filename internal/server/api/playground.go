@@ -297,7 +297,7 @@ func (handlers *PlaygroundHandlers) ChatCompletion(c *gin.Context) {
 		c.Header("Content-Type", "text/event-stream")
 		c.Header("Cache-Control", "no-cache")
 		c.Header("Connection", "keep-alive")
-		c.Header("Access-Control-Allow-Origin", "*")
+		SetSSECORSHeaders(c)
 		c.Header("X-Vercel-AI-Data-Stream", "v1")
 		c.Status(http.StatusOK)
 

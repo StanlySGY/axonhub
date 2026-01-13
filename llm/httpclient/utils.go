@@ -9,6 +9,24 @@ import (
 	"github.com/samber/lo"
 )
 
+// DefaultMaxBodySize is the default maximum request body size (32MB)
+const DefaultMaxBodySize int64 = 32 << 20
+
+// maxBodySize is the configured maximum body size for request reading
+var maxBodySize int64 = DefaultMaxBodySize
+
+// SetMaxBodySize sets the maximum body size for request reading
+func SetMaxBodySize(size int64) {
+	if size > 0 {
+		maxBodySize = size
+	}
+}
+
+// GetMaxBodySize returns the current maximum body size
+func GetMaxBodySize() int64 {
+	return maxBodySize
+}
+
 func ReadHTTPRequest(rawReq *http.Request) (*Request, error) {
 	req := &Request{
 		Method:     rawReq.Method,
@@ -22,9 +40,16 @@ func ReadHTTPRequest(rawReq *http.Request) (*Request, error) {
 		RawRequest: rawReq,
 	}
 
-	body, err := io.ReadAll(rawReq.Body)
+	// Use LimitReader to prevent DoS attacks from oversized request bodies
+	limitedReader := io.LimitReader(rawReq.Body, maxBodySize+1)
+	body, err := io.ReadAll(limitedReader)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read request body: %w", err)
+	}
+
+	// Check if body exceeds the limit
+	if int64(len(body)) > maxBodySize {
+		return nil, fmt.Errorf("request body too large: exceeds %d bytes limit", maxBodySize)
 	}
 
 	req.Body = body
