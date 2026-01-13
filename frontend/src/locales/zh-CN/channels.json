@@ -550,7 +550,20 @@
       "remark": "备注",
       "tags": "标签",
       "apiFormat": "API 格式",
-      "noPerformanceData": "暂无性能数据"
+      "noPerformanceData": "暂无性能数据",
+      "disableInfo": "禁用信息",
+      "disableReason": "原因",
+      "disableMessage": "消息",
+      "errorCode": "错误码",
+      "errorCount": "错误次数",
+      "disabledAt": "禁用时间"
+    },
+    "disableReasons": {
+      "manual": "手动禁用",
+      "auto_disabled": "因错误自动禁用",
+      "test_failed": "测试失败",
+      "quota_exceeded": "配额超限",
+      "auth_failed": "认证失败"
     },
     "validation": {},
     "templates": {

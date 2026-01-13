@@ -67,6 +67,14 @@ const CHANNELS_QUERY = `
           }
           orderingWeight
           errorMessage
+          disableInfo {
+            type
+            message
+            errorCode
+            errorCount
+            disabledAt
+            disabledBy
+          }
           remark
           channelPerformance {
             avgLatencyMs

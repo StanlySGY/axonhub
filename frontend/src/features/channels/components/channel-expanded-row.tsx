@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
+import { AlertTriangle } from 'lucide-react';
 import { formatDuration } from '@/utils/format-duration';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -96,6 +97,52 @@ export const ChannelExpandedRow = memo(({ channel, getApiFormatLabel }: ChannelE
           </ExpandedRowSection>
         </div>
       </ExpandedRowGrid>
+
+      {channel.status === 'disabled' && channel.disableInfo && (
+        <ExpandedRowSection
+          title={
+            <span className='flex items-center gap-2 text-amber-600 dark:text-amber-400'>
+              <AlertTriangle className='h-4 w-4' />
+              {t('channels.expandedRow.disableInfo')}
+            </span>
+          }
+        >
+          <div className='grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4'>
+            <ExpandedRowField
+              label={t('channels.expandedRow.disableReason')}
+              value={
+                <Badge variant='outline' className='border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-900/30 dark:text-amber-300'>
+                  {t(`channels.disableReasons.${channel.disableInfo.type}`)}
+                </Badge>
+              }
+            />
+            {channel.disableInfo.message && (
+              <ExpandedRowField
+                label={t('channels.expandedRow.disableMessage')}
+                value={<span className='text-sm'>{channel.disableInfo.message}</span>}
+              />
+            )}
+            {channel.disableInfo.errorCode && (
+              <ExpandedRowField
+                label={t('channels.expandedRow.errorCode')}
+                value={<span className='font-mono text-sm'>{channel.disableInfo.errorCode}</span>}
+              />
+            )}
+            {channel.disableInfo.errorCount && (
+              <ExpandedRowField
+                label={t('channels.expandedRow.errorCount')}
+                value={<span className='font-mono text-sm'>{channel.disableInfo.errorCount}</span>}
+              />
+            )}
+            {channel.disableInfo.disabledAt && (
+              <ExpandedRowField
+                label={t('channels.expandedRow.disabledAt')}
+                value={format(new Date(channel.disableInfo.disabledAt * 1000), 'yyyy-MM-dd HH:mm')}
+              />
+            )}
+          </div>
+        </ExpandedRowSection>
+      )}
 
       {channel.supportedModels && channel.supportedModels.length > 0 && (
         <ExpandedRowSection title={t('channels.expandedRow.supportedModels')}>

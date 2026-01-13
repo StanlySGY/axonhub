@@ -547,7 +547,20 @@
       "remark": "Remark",
       "tags": "Tags",
       "apiFormat": "API Format",
-      "noPerformanceData": "No performance data available"
+      "noPerformanceData": "No performance data available",
+      "disableInfo": "Disable Information",
+      "disableReason": "Reason",
+      "disableMessage": "Message",
+      "errorCode": "Error Code",
+      "errorCount": "Error Count",
+      "disabledAt": "Disabled At"
+    },
+    "disableReasons": {
+      "manual": "Manually disabled",
+      "auto_disabled": "Auto-disabled due to errors",
+      "test_failed": "Test failed",
+      "quota_exceeded": "Quota exceeded",
+      "auth_failed": "Authentication failed"
     },
     "validation": {},
     "templates": {

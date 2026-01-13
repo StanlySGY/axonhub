@@ -109,6 +109,27 @@ export const channelProbeDataSchema = z.object({
 });
 export type ChannelProbeData = z.infer<typeof channelProbeDataSchema>;
 
+// Disable Reason Type
+export const disableReasonTypeSchema = z.enum([
+  'manual',
+  'auto_disabled',
+  'test_failed',
+  'quota_exceeded',
+  'auth_failed',
+]);
+export type DisableReasonType = z.infer<typeof disableReasonTypeSchema>;
+
+// Channel Disable Info
+export const channelDisableInfoSchema = z.object({
+  type: disableReasonTypeSchema,
+  message: z.string().optional().nullable(),
+  errorCode: z.number().optional().nullable(),
+  errorCount: z.number().optional().nullable(),
+  disabledAt: z.number().optional().nullable(),
+  disabledBy: z.number().optional().nullable(),
+});
+export type ChannelDisableInfo = z.infer<typeof channelDisableInfoSchema>;
+
 // Channel Settings
 export const channelSettingsSchema = z.object({
   extraModelPrefix: z.string().optional(),
@@ -170,6 +191,7 @@ export const channelSchema = z.object({
   settings: channelSettingsSchema.optional().nullable(),
   orderingWeight: z.number().optional().default(0),
   errorMessage: z.string().optional().nullable(),
+  disableInfo: channelDisableInfoSchema.optional().nullable(),
   remark: z.string().optional().nullable(),
   channelPerformance: channelPerformanceSchema.optional().nullable(),
   allModelEntries: z.array(channelModelEntrySchema).optional(),
