@@ -3,26 +3,26 @@
 import { useTranslation } from 'react-i18next';
 import { CartesianGrid, ResponsiveContainer, XAxis, YAxis, Tooltip, Area, AreaChart } from 'recharts';
 import { formatNumber } from '@/utils/format-number';
-import { Skeleton } from '@/components/ui/skeleton';
+import { ChartSkeleton } from '@/components/ui/chart-skeleton';
+import { ErrorState } from '@/components/error-state';
 import { useDailyRequestStats } from '../data/dashboard';
 
 export function DailyRequestStats() {
   const { t } = useTranslation();
-  const { data: dailyStats, isLoading, error } = useDailyRequestStats();
+  const { data: dailyStats, isLoading, error, refetch } = useDailyRequestStats();
 
   if (isLoading) {
-    return (
-      <div className='flex h-[350px] items-center justify-center'>
-        <Skeleton className='h-full w-full' />
-      </div>
-    );
+    return <ChartSkeleton height={350} />;
   }
 
   if (error) {
     return (
-      <div className='flex h-[350px] items-center justify-center text-red-500'>
-        {t('dashboard.charts.errorLoadingChart')} {error.message}
-      </div>
+      <ErrorState
+        title={t('dashboard.charts.errorLoadingChart')}
+        description={error.message}
+        onRetry={() => refetch()}
+        className="h-[350px]"
+      />
     );
   }
 
