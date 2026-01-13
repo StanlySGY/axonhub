@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { TableSkeleton } from '@/components/ui/table-skeleton';
 import { ServerSidePagination } from '@/components/server-side-pagination';
+import { arraysEqual } from '@/utils/array-utils';
 import { useApiKeysContext } from '../context/apikeys-context';
 import { ApiKey, ApiKeyConnection } from '../data/schema';
 import { DataTableToolbar } from './data-table-toolbar';
@@ -71,9 +72,24 @@ export function ApiKeysTable({
   const { t } = useTranslation();
   const { setResetRowSelection, setSelectedApiKeys, openDialog } = useApiKeysContext();
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(() => {
+    const stored = localStorage.getItem('apikeys-table-column-visibility');
+    if (stored) {
+      try {
+        return JSON.parse(stored);
+      } catch {
+        return {};
+      }
+    }
+    return {};
+  });
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
+
+  // Save column visibility to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('apikeys-table-column-visibility', JSON.stringify(columnVisibility));
+  }, [columnVisibility]);
 
   useEffect(() => {
     const resetFn = () => {
@@ -82,7 +98,8 @@ export function ApiKeysTable({
     setResetRowSelection(resetFn);
   }, [setResetRowSelection]);
 
-  React.useEffect(() => {
+  // Sync server state to local column filters (for UI display)
+  useEffect(() => {
     const newFilters: ColumnFiltersState = [];
     if (nameFilter) {
       newFilters.push({ id: 'name', value: nameFilter });
@@ -110,12 +127,12 @@ export function ApiKeysTable({
     }
 
     const newStatusFilter = Array.isArray(statusFilterValue) ? statusFilterValue : [];
-    if (JSON.stringify(newStatusFilter.sort()) !== JSON.stringify(statusFilter.sort())) {
+    if (!arraysEqual(newStatusFilter, statusFilter)) {
       onStatusFilterChange(newStatusFilter);
     }
 
     const newUserFilter = Array.isArray(userFilterValue) ? userFilterValue : [];
-    if (JSON.stringify(newUserFilter.sort()) !== JSON.stringify(userFilter.sort())) {
+    if (!arraysEqual(newUserFilter, userFilter)) {
       onUserFilterChange(newUserFilter);
     }
   };
