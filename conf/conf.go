@@ -81,7 +81,15 @@ func Load() (Config, error) {
 		return Config{}, fmt.Errorf("failed to unmarshal config: %w", err)
 	}
 
-	log.Debug(context.Background(), "Config loaded successfully", log.Any("config", config))
+	log.Debug(context.Background(), "Config loaded successfully",
+		log.String("server.name", config.APIServer.Name),
+		log.Int("server.port", config.APIServer.Port),
+		log.String("db.dialect", config.DB.Dialect),
+		log.Bool("db.auto_migrate", config.DB.AutoMigrate),
+		log.String("log.level", logLevelStr),
+		log.Bool("metrics.enabled", config.Metrics.Enabled),
+		log.String("cache.mode", config.Cache.Mode),
+	)
 
 	return config, nil
 }

@@ -121,8 +121,8 @@ func (processor *ChatCompletionOrchestrator) Process(ctx context.Context, reques
 
 	if log.DebugEnabled(ctx) {
 		log.Debug(ctx, "chat request received",
-			log.String("request_body", string(request.Body)),
-			log.Any("request_headers", request.Headers),
+			log.Int("request_body_length", len(request.Body)),
+			log.Any("request_headers", httpclient.MaskSensitiveHeaders(request.Headers)),
 			log.Any("retry_policy", retryPolicy),
 		)
 	}

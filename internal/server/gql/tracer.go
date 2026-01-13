@@ -32,9 +32,12 @@ func (t *loggingTracer) InterceptResponse(ctx context.Context, next graphql.Resp
 		ctx = tracing.WithOperationName(ctx, opCtx.OperationName)
 
 		if log.DebugEnabled(ctx) {
+			// Log operation name and query length only, avoid logging full query/variables
+			// which may contain sensitive data like passwords or tokens
 			log.Debug(ctx, "received graphql request",
-				zap.Any("raw", opCtx.RawQuery),
-				zap.Any("variables", opCtx.Variables),
+				zap.String("operation", opCtx.OperationName),
+				zap.Int("query_length", len(opCtx.RawQuery)),
+				zap.Int("variables_count", len(opCtx.Variables)),
 			)
 		}
 	}

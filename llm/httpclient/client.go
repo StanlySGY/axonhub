@@ -15,10 +15,21 @@ import (
 	"github.com/looplj/axonhub/llm/streams"
 )
 
+// maxLogBodySize is the maximum size of request/response body to log (1KB)
+const maxLogBodySize = 1024
+
 // HttpClient implements the HttpClient interface.
 type HttpClient struct {
 	client      *http.Client
 	proxyConfig *ProxyConfig
+}
+
+// truncateForLog truncates a byte slice for safe logging
+func truncateForLog(data []byte, maxLen int) string {
+	if len(data) <= maxLen {
+		return string(data)
+	}
+	return string(data[:maxLen]) + fmt.Sprintf("... (truncated, total %d bytes)", len(data))
 }
 
 // NewHttpClientWithProxy creates a new HTTP client with proxy configuration.
@@ -107,7 +118,13 @@ func NewHttpClientWithClient(client *http.Client) *HttpClient {
 
 // Do executes the HTTP request.
 func (hc *HttpClient) Do(ctx context.Context, request *Request) (*Response, error) {
-	log.Debug(ctx, "execute http request", log.Any("request", request), log.Any("proxy", hc.proxyConfig))
+	if log.DebugEnabled(ctx) {
+		log.Debug(ctx, "execute http request",
+			log.String("method", request.Method),
+			log.String("url", request.URL),
+			log.Any("headers", MaskSensitiveHeaders(request.Headers)),
+		)
+	}
 
 	rawReq, err := hc.buildHttpRequest(ctx, request)
 	if err != nil {
@@ -139,7 +156,7 @@ func (hc *HttpClient) Do(ctx context.Context, request *Request) (*Response, erro
 				log.String("method", rawReq.Method),
 				log.String("url", rawReq.URL.String()),
 				log.Any("status_code", rawResp.StatusCode),
-				log.String("body", string(body)))
+				log.String("body", truncateForLog(body, maxLogBodySize)))
 		}
 
 		return nil, &Error{
@@ -156,7 +173,7 @@ func (hc *HttpClient) Do(ctx context.Context, request *Request) (*Response, erro
 			log.String("method", rawReq.Method),
 			log.String("url", rawReq.URL.String()),
 			log.Any("status_code", rawResp.StatusCode),
-			log.String("body", string(body)))
+			log.Int("body_length", len(body)))
 	}
 
 	// Build generic response
@@ -175,7 +192,13 @@ func (hc *HttpClient) Do(ctx context.Context, request *Request) (*Response, erro
 
 // DoStream executes a streaming HTTP request using Server-Sent Events.
 func (hc *HttpClient) DoStream(ctx context.Context, request *Request) (streams.Stream[*StreamEvent], error) {
-	log.Debug(ctx, "execute stream request", log.Any("request", request))
+	if log.DebugEnabled(ctx) {
+		log.Debug(ctx, "execute stream request",
+			log.String("method", request.Method),
+			log.String("url", request.URL),
+			log.Any("headers", MaskSensitiveHeaders(request.Headers)),
+		)
+	}
 
 	rawReq, err := hc.buildHttpRequest(ctx, request)
 	if err != nil {
@@ -213,7 +236,7 @@ func (hc *HttpClient) DoStream(ctx context.Context, request *Request) (streams.S
 				log.String("method", rawReq.Method),
 				log.String("url", rawReq.URL.String()),
 				log.Any("status_code", rawResp.StatusCode),
-				log.String("body", string(body)))
+				log.String("body", truncateForLog(body, maxLogBodySize)))
 		}
 
 		return nil, &Error{
