@@ -8,7 +8,7 @@ import { ErrorState } from '@/components/error-state';
 import { useDailyRequestStats } from '../data/dashboard';
 
 export function DailyRequestStats() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { data: dailyStats, isLoading, error, refetch } = useDailyRequestStats();
 
   if (isLoading) {
@@ -29,7 +29,7 @@ export function DailyRequestStats() {
   // Transform data for the chart
   const chartData =
     dailyStats?.map((stat) => ({
-      name: new Date(stat.date).toLocaleDateString('zh-CN', {
+      name: new Date(stat.date).toLocaleDateString(i18n.language, {
         month: '2-digit',
         day: '2-digit',
       }),
@@ -46,39 +46,39 @@ export function DailyRequestStats() {
   return (
     <div
       role="img"
-      aria-label={t('dashboard.charts.dailyRequestOverview') + `: ${totalRequests} ${t('dashboard.stats.totalRequests')}`}
+      aria-label={`${t('dashboard.charts.dailyRequestOverview')}: ${formatNumber(totalRequests)} ${t('dashboard.stats.totalRequests')}`}
     >
-      <ResponsiveContainer width='100%' height={350}>
+      <ResponsiveContainer width="100%" height={350}>
         <AreaChart data={chartData}>
-        <defs>
-          <linearGradient id='colorTotal' x1='0' y1='0' x2='0' y2='1'>
-            <stop offset='5%' stopColor='var(--primary)' stopOpacity={0.2} />
-            <stop offset='95%' stopColor='var(--primary)' stopOpacity={0} />
-          </linearGradient>
-        </defs>
-        <CartesianGrid strokeDasharray='3 3' stroke='var(--border)' vertical={false} />
-        <XAxis dataKey='name' stroke='var(--muted-foreground)' fontSize={12} tickLine={false} axisLine={false} />
-        <YAxis
-          stroke='var(--muted-foreground)'
-          fontSize={12}
-          tickLine={false}
-          axisLine={false}
-          domain={[0, yAxisMax]}
-          tickFormatter={(value) => formatNumber(value)}
-        />
-        <Tooltip formatter={(value) => formatNumber(Number(value))} />
-        <Area
-          type='monotone'
-          dataKey='total'
-          stroke='var(--primary)'
-          strokeWidth={2}
-          fillOpacity={1}
-          fill='url(#colorTotal)'
-          dot={false}
-          activeDot={{ r: 5 }}
-        />
-      </AreaChart>
-    </ResponsiveContainer>
+          <defs>
+            <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.2} />
+              <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+          <XAxis dataKey="name" stroke="var(--muted-foreground)" fontSize={12} tickLine={false} axisLine={false} />
+          <YAxis
+            stroke="var(--muted-foreground)"
+            fontSize={12}
+            tickLine={false}
+            axisLine={false}
+            domain={[0, yAxisMax]}
+            tickFormatter={(value) => formatNumber(value)}
+          />
+          <Tooltip formatter={(value) => formatNumber(Number(value))} />
+          <Area
+            type="monotone"
+            dataKey="total"
+            stroke="var(--primary)"
+            strokeWidth={2}
+            fillOpacity={1}
+            fill="url(#colorTotal)"
+            dot={false}
+            activeDot={{ r: 5 }}
+          />
+        </AreaChart>
+      </ResponsiveContainer>
     </div>
   );
 }

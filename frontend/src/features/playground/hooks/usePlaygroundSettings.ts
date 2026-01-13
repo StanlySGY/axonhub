@@ -38,8 +38,10 @@ export function usePlaygroundSettings() {
   const handleModelChange = useCallback((newModel: string) => {
     setSelectedGroupModel(newModel);
     const parts = newModel.split('|');
-    setModel(parts[1]);
-    setSelectedChannel(parts[0]);
+    if (parts.length >= 2) {
+      setModel(parts[1]);
+      setSelectedChannel(parts[0]);
+    }
   }, []);
 
   // Auto-select first model
