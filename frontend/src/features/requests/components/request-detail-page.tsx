@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import { DashboardIcon } from '@radix-ui/react-icons';
 import { useParams, useNavigate } from '@tanstack/react-router';
 import { zhCN, enUS } from 'date-fns/locale';
-import { Copy, Clock, Key, Database, ArrowLeft, FileText, Layers } from 'lucide-react';
+import { Copy, Clock, Key, Database, ArrowLeft, FileText, Layers, ArrowRight, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { extractNumberID } from '@/lib/utils';
@@ -388,6 +388,47 @@ export default function RequestDetailPage() {
                 <TabsContent value='executions' className='space-y-6 p-6'>
                   {executions && executions.edges.length > 0 ? (
                     <div className='space-y-6'>
+                      {/* Execution Timeline Overview */}
+                      {executions.edges.length > 1 && (
+                        <div className='bg-muted/30 rounded-lg border p-4'>
+                          <h4 className='mb-4 text-sm font-semibold'>{t('requests.detail.executionTimeline')}</h4>
+                          <div className='flex items-center gap-2 overflow-x-auto pb-2'>
+                            {executions.edges.map((edge: any, index: number) => {
+                              const execution = edge.node;
+                              const isLast = index === executions.edges.length - 1;
+                              const statusIcon = execution.status === 'completed' ? (
+                                <CheckCircle2 className='h-4 w-4 text-green-500' />
+                              ) : execution.status === 'failed' ? (
+                                <XCircle className='h-4 w-4 text-red-500' />
+                              ) : (
+                                <Loader2 className='h-4 w-4 animate-spin text-blue-500' />
+                              );
+                              return (
+                                <div key={execution.id} className='flex items-center gap-2'>
+                                  <div className={`flex items-center gap-2 rounded-lg border px-3 py-2 ${
+                                    execution.status === 'completed'
+                                      ? 'border-green-200 bg-green-50 dark:border-green-800/50 dark:bg-green-900/20'
+                                      : execution.status === 'failed'
+                                      ? 'border-red-200 bg-red-50 dark:border-red-800/50 dark:bg-red-900/20'
+                                      : 'border-blue-200 bg-blue-50 dark:border-blue-800/50 dark:bg-blue-900/20'
+                                  }`}>
+                                    {statusIcon}
+                                    <div className='flex flex-col'>
+                                      <span className='text-xs font-medium'>{execution.channel?.name || t('requests.columns.unknown')}</span>
+                                      <span className='text-muted-foreground text-[10px]'>
+                                        {execution.status === 'completed' || execution.status === 'failed'
+                                          ? formatLatency(calculateLatency(execution.createdAt, execution.updatedAt))
+                                          : t(`requests.status.${execution.status}`)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  {!isLast && <ArrowRight className='text-muted-foreground h-4 w-4 shrink-0' />}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
                       {executions.edges.map((edge: any, index: number) => {
                         const execution = edge.node;
                         return (

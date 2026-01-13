@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 import { ColumnDef } from '@tanstack/react-table';
 import { zhCN, enUS } from 'date-fns/locale';
 import { FileText } from 'lucide-react';
-import { IconRoute, IconArrowsJoin2, IconTransactionBitcoin, IconTransform } from '@tabler/icons-react';
+import { IconRoute, IconArrowsJoin2, IconTransactionBitcoin, IconTransform, IconRefresh } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { extractNumberID } from '@/lib/utils';
 import { formatDuration } from '@/utils/format-duration';
@@ -222,6 +222,32 @@ export function useRequestsColumns(): ColumnDef<Request>[] {
         return value.includes(row.getValue(id));
       },
       enableSorting: false,
+      enableHiding: true,
+    },
+    {
+      id: 'executionCount',
+      accessorKey: 'executionCount',
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('requests.columns.executionCount')} />,
+      cell: ({ row }) => {
+        const count = row.original.executionCount || 1;
+        if (count <= 1) {
+          return <div className='text-muted-foreground text-xs'>1</div>;
+        }
+        return (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className='flex w-fit cursor-help items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 dark:border-amber-800/50 dark:bg-amber-900/30 dark:text-amber-300'>
+                <IconRefresh className='h-3.5 w-3.5' />
+                <span>{count}</span>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side='top'>
+              <span>{t('requests.columns.executionCountTooltip', { count })}</span>
+            </TooltipContent>
+          </Tooltip>
+        );
+      },
+      enableSorting: true,
       enableHiding: true,
     },
     {

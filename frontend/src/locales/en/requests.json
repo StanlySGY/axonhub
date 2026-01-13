@@ -29,7 +29,9 @@
       "requestHeaders": "Request Headers",
       "executedModelId": "Executed Model ID",
       "retryProcess": "Retry Process",
-      "mappedModel": "Mapped Model"
+      "mappedModel": "Mapped Model",
+      "executionCount": "Executions",
+      "executionCountTooltip": "This request was executed {{count}} times (including retries)"
     },
     "status": {
       "pending": "Pending",
@@ -61,6 +63,7 @@
     "detail": {
       "title": "Request Details",
       "overview": "Overview",
+      "executionTimeline": "Execution Timeline",
       "tabs": {
         "request": "Request",
         "response": "Response",

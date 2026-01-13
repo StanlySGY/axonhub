@@ -54,6 +54,7 @@ export const requestSchema = z.object({
   responseChunks: z.array(z.any()).nullable().optional(), // [JSONRawMessage!]
   status: requestStatusSchema,
   stream: z.boolean().nullable(),
+  executionCount: z.number().optional(),
   metricsLatencyMs: z.number().nullable().optional(),
   metricsFirstTokenLatencyMs: z.number().nullable().optional(),
   executions: z

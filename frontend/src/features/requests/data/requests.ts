@@ -50,6 +50,7 @@ function buildRequestsQuery(permissions: { canViewApiKeys: boolean; canViewChann
             modelID
             stream
             status
+            executionCount
             metricsLatencyMs
             metricsFirstTokenLatencyMs
             executions(first: 10, orderBy: { field: CREATED_AT, direction: DESC }) {
