@@ -440,6 +440,17 @@ func (r *queryResolver) QueryChannelOverrideTemplates(ctx context.Context, input
 
 // ExecutionCount is the resolver for the executionCount field.
 func (r *requestResolver) ExecutionCount(ctx context.Context, obj *ent.Request) (int, error) {
+	// Try to use dataloader if available
+	loaders := GetLoaders(ctx)
+	if loaders != nil {
+		count, err := LoadExecutionCount(ctx, obj.ID)
+		if err != nil {
+			return 0, fmt.Errorf("failed to load execution count via dataloader: %w", err)
+		}
+		return count, nil
+	}
+
+	// Fallback to direct query if dataloader not available
 	count, err := r.client.RequestExecution.Query().
 		Where(requestexecution.RequestIDEQ(obj.ID)).
 		Count(ctx)
