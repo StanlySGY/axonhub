@@ -40,9 +40,16 @@ export function DailyRequestStats() {
   const maxValue = Math.max(...chartData.map((d) => d.total), 0);
   const yAxisMax = Math.max(10, Math.ceil(maxValue * 1.1));
 
+  // Calculate total requests for accessibility summary
+  const totalRequests = chartData.reduce((sum, d) => sum + d.total, 0);
+
   return (
-    <ResponsiveContainer width='100%' height={350}>
-      <AreaChart data={chartData}>
+    <div
+      role="img"
+      aria-label={t('dashboard.charts.dailyRequestOverview') + `: ${totalRequests} ${t('dashboard.stats.totalRequests')}`}
+    >
+      <ResponsiveContainer width='100%' height={350}>
+        <AreaChart data={chartData}>
         <defs>
           <linearGradient id='colorTotal' x1='0' y1='0' x2='0' y2='1'>
             <stop offset='5%' stopColor='var(--primary)' stopOpacity={0.2} />
@@ -72,5 +79,6 @@ export function DailyRequestStats() {
         />
       </AreaChart>
     </ResponsiveContainer>
+    </div>
   );
 }
