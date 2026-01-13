@@ -50,6 +50,8 @@ type Channel struct {
 	OrderingWeight int `json:"ordering_weight,omitempty"`
 	// ErrorMessage holds the value of the "error_message" field.
 	ErrorMessage *string `json:"error_message,omitempty"`
+	// Structured information about why the channel was disabled
+	DisableInfo *objects.ChannelDisableInfo `json:"disable_info,omitempty"`
 	// User-defined remark or note for the channel
 	Remark *string `json:"remark,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -134,7 +136,7 @@ func (*Channel) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case channel.FieldCredentials, channel.FieldSupportedModels, channel.FieldTags, channel.FieldSettings:
+		case channel.FieldCredentials, channel.FieldSupportedModels, channel.FieldTags, channel.FieldSettings, channel.FieldDisableInfo:
 			values[i] = new([]byte)
 		case channel.FieldAutoSyncSupportedModels:
 			values[i] = new(sql.NullBool)
@@ -264,6 +266,14 @@ func (_m *Channel) assignValues(columns []string, values []any) error {
 				_m.ErrorMessage = new(string)
 				*_m.ErrorMessage = value.String
 			}
+		case channel.FieldDisableInfo:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field disable_info", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.DisableInfo); err != nil {
+					return fmt.Errorf("unmarshal field disable_info: %w", err)
+				}
+			}
 		case channel.FieldRemark:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field remark", values[i])
@@ -377,6 +387,9 @@ func (_m *Channel) String() string {
 		builder.WriteString("error_message=")
 		builder.WriteString(*v)
 	}
+	builder.WriteString(", ")
+	builder.WriteString("disable_info=")
+	builder.WriteString(fmt.Sprintf("%v", _m.DisableInfo))
 	builder.WriteString(", ")
 	if v := _m.Remark; v != nil {
 		builder.WriteString("remark=")

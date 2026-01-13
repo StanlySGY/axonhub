@@ -272,6 +272,10 @@ type Channel implements Node {
   orderingWeight: Int!
   errorMessage: String
   """
+  Structured information about why the channel was disabled
+  """
+  disableInfo: ChannelDisableInfo
+  """
   User-defined remark or note for the channel
   """
   remark: String
@@ -4827,6 +4831,11 @@ input UpdateChannelInput {
   orderingWeight: Int
   errorMessage: String
   clearErrorMessage: Boolean
+  """
+  Structured information about why the channel was disabled
+  """
+  disableInfo: ChannelDisableInfoInput
+  clearDisableInfo: Boolean
   """
   User-defined remark or note for the channel
   """

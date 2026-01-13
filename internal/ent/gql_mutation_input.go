@@ -149,6 +149,8 @@ type UpdateChannelInput struct {
 	OrderingWeight          *int
 	ClearErrorMessage       bool
 	ErrorMessage            *string
+	ClearDisableInfo        bool
+	DisableInfo             *objects.ChannelDisableInfo
 	ClearRemark             bool
 	Remark                  *string
 }
@@ -205,6 +207,12 @@ func (i *UpdateChannelInput) Mutate(m *ChannelMutation) {
 	}
 	if v := i.ErrorMessage; v != nil {
 		m.SetErrorMessage(*v)
+	}
+	if i.ClearDisableInfo {
+		m.ClearDisableInfo()
+	}
+	if v := i.DisableInfo; v != nil {
+		m.SetDisableInfo(v)
 	}
 	if i.ClearRemark {
 		m.ClearRemark()

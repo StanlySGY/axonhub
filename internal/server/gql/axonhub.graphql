@@ -111,6 +111,53 @@ input GCPCredentialInput {
   jsonData: String!
 }
 
+"""
+DisableReasonType represents the type of reason for disabling a channel.
+"""
+enum DisableReasonType {
+  manual
+  auto_disabled
+  test_failed
+  quota_exceeded
+  auth_failed
+}
+
+"""
+ChannelDisableInfo contains structured information about why a channel was disabled.
+"""
+type ChannelDisableInfo {
+  """The reason type for disabling the channel."""
+  type: DisableReasonType!
+  """A human-readable description of the disable reason."""
+  message: String
+  """The HTTP status code that triggered the disable (if applicable)."""
+  errorCode: Int
+  """The number of consecutive errors before disable."""
+  errorCount: Int
+  """The timestamp when the channel was disabled."""
+  disabledAt: Int
+  """The user ID who disabled the channel (for manual disable)."""
+  disabledBy: Int
+}
+
+"""
+ChannelDisableInfoInput is the input type for ChannelDisableInfo.
+"""
+input ChannelDisableInfoInput {
+  """The reason type for disabling the channel."""
+  type: DisableReasonType!
+  """A human-readable description of the disable reason."""
+  message: String
+  """The HTTP status code that triggered the disable (if applicable)."""
+  errorCode: Int
+  """The number of consecutive errors before disable."""
+  errorCount: Int
+  """The timestamp when the channel was disabled."""
+  disabledAt: Int
+  """The user ID who disabled the channel (for manual disable)."""
+  disabledBy: Int
+}
+
 input SignInInput {
   email: String!
   password: String!
@@ -311,6 +358,13 @@ extend type Trace {
 
 extend type Thread {
   firstUserQuery: String @goField(forceResolver: true)
+}
+
+extend type Request {
+  """
+  The number of executions (including retries) for this request.
+  """
+  executionCount: Int! @goField(forceResolver: true)
 }
 
 extend type Channel {

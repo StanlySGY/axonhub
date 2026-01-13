@@ -182,6 +182,12 @@ func (_c *ChannelCreate) SetNillableErrorMessage(v *string) *ChannelCreate {
 	return _c
 }
 
+// SetDisableInfo sets the "disable_info" field.
+func (_c *ChannelCreate) SetDisableInfo(v *objects.ChannelDisableInfo) *ChannelCreate {
+	_c.mutation.SetDisableInfo(v)
+	return _c
+}
+
 // SetRemark sets the "remark" field.
 func (_c *ChannelCreate) SetRemark(v string) *ChannelCreate {
 	_c.mutation.SetRemark(v)
@@ -488,6 +494,10 @@ func (_c *ChannelCreate) createSpec() (*Channel, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.ErrorMessage(); ok {
 		_spec.SetField(channel.FieldErrorMessage, field.TypeString, value)
 		_node.ErrorMessage = &value
+	}
+	if value, ok := _c.mutation.DisableInfo(); ok {
+		_spec.SetField(channel.FieldDisableInfo, field.TypeJSON, value)
+		_node.DisableInfo = value
 	}
 	if value, ok := _c.mutation.Remark(); ok {
 		_spec.SetField(channel.FieldRemark, field.TypeString, value)
@@ -817,6 +827,24 @@ func (u *ChannelUpsert) ClearErrorMessage() *ChannelUpsert {
 	return u
 }
 
+// SetDisableInfo sets the "disable_info" field.
+func (u *ChannelUpsert) SetDisableInfo(v *objects.ChannelDisableInfo) *ChannelUpsert {
+	u.Set(channel.FieldDisableInfo, v)
+	return u
+}
+
+// UpdateDisableInfo sets the "disable_info" field to the value that was provided on create.
+func (u *ChannelUpsert) UpdateDisableInfo() *ChannelUpsert {
+	u.SetExcluded(channel.FieldDisableInfo)
+	return u
+}
+
+// ClearDisableInfo clears the value of the "disable_info" field.
+func (u *ChannelUpsert) ClearDisableInfo() *ChannelUpsert {
+	u.SetNull(channel.FieldDisableInfo)
+	return u
+}
+
 // SetRemark sets the "remark" field.
 func (u *ChannelUpsert) SetRemark(v string) *ChannelUpsert {
 	u.Set(channel.FieldRemark, v)
@@ -1104,6 +1132,27 @@ func (u *ChannelUpsertOne) UpdateErrorMessage() *ChannelUpsertOne {
 func (u *ChannelUpsertOne) ClearErrorMessage() *ChannelUpsertOne {
 	return u.Update(func(s *ChannelUpsert) {
 		s.ClearErrorMessage()
+	})
+}
+
+// SetDisableInfo sets the "disable_info" field.
+func (u *ChannelUpsertOne) SetDisableInfo(v *objects.ChannelDisableInfo) *ChannelUpsertOne {
+	return u.Update(func(s *ChannelUpsert) {
+		s.SetDisableInfo(v)
+	})
+}
+
+// UpdateDisableInfo sets the "disable_info" field to the value that was provided on create.
+func (u *ChannelUpsertOne) UpdateDisableInfo() *ChannelUpsertOne {
+	return u.Update(func(s *ChannelUpsert) {
+		s.UpdateDisableInfo()
+	})
+}
+
+// ClearDisableInfo clears the value of the "disable_info" field.
+func (u *ChannelUpsertOne) ClearDisableInfo() *ChannelUpsertOne {
+	return u.Update(func(s *ChannelUpsert) {
+		s.ClearDisableInfo()
 	})
 }
 
@@ -1563,6 +1612,27 @@ func (u *ChannelUpsertBulk) UpdateErrorMessage() *ChannelUpsertBulk {
 func (u *ChannelUpsertBulk) ClearErrorMessage() *ChannelUpsertBulk {
 	return u.Update(func(s *ChannelUpsert) {
 		s.ClearErrorMessage()
+	})
+}
+
+// SetDisableInfo sets the "disable_info" field.
+func (u *ChannelUpsertBulk) SetDisableInfo(v *objects.ChannelDisableInfo) *ChannelUpsertBulk {
+	return u.Update(func(s *ChannelUpsert) {
+		s.SetDisableInfo(v)
+	})
+}
+
+// UpdateDisableInfo sets the "disable_info" field to the value that was provided on create.
+func (u *ChannelUpsertBulk) UpdateDisableInfo() *ChannelUpsertBulk {
+	return u.Update(func(s *ChannelUpsert) {
+		s.UpdateDisableInfo()
+	})
+}
+
+// ClearDisableInfo clears the value of the "disable_info" field.
+func (u *ChannelUpsertBulk) ClearDisableInfo() *ChannelUpsertBulk {
+	return u.Update(func(s *ChannelUpsert) {
+		s.ClearDisableInfo()
 	})
 }
 

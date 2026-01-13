@@ -184,6 +184,7 @@ type ComplexityRoot struct {
 		Credentials             func(childComplexity int) int
 		DefaultTestModel        func(childComplexity int) int
 		DeletedAt               func(childComplexity int) int
+		DisableInfo             func(childComplexity int) int
 		ErrorMessage            func(childComplexity int) int
 		Executions              func(childComplexity int, after *entgql.Cursor[int], first *int, before *entgql.Cursor[int], last *int, orderBy *ent.RequestExecutionOrder, where *ent.RequestExecutionWhereInput) int
 		ID                      func(childComplexity int) int
@@ -210,6 +211,15 @@ type ComplexityRoot struct {
 		APIKey func(childComplexity int) int
 		AWS    func(childComplexity int) int
 		GCP    func(childComplexity int) int
+	}
+
+	ChannelDisableInfo struct {
+		DisabledAt func(childComplexity int) int
+		DisabledBy func(childComplexity int) int
+		ErrorCode  func(childComplexity int) int
+		ErrorCount func(childComplexity int) int
+		Message    func(childComplexity int) int
+		Type       func(childComplexity int) int
 	}
 
 	ChannelEdge struct {
@@ -769,6 +779,7 @@ type ComplexityRoot struct {
 		CreatedAt                  func(childComplexity int) int
 		DataStorage                func(childComplexity int) int
 		DataStorageID              func(childComplexity int) int
+		ExecutionCount             func(childComplexity int) int
 		Executions                 func(childComplexity int, after *entgql.Cursor[int], first *int, before *entgql.Cursor[int], last *int, orderBy *ent.RequestExecutionOrder, where *ent.RequestExecutionWhereInput) int
 		ExternalID                 func(childComplexity int) int
 		Format                     func(childComplexity int) int
@@ -1443,6 +1454,8 @@ type RequestResolver interface {
 	ChannelID(ctx context.Context, obj *ent.Request) (*objects.GUID, error)
 
 	Channel(ctx context.Context, obj *ent.Request) (*ent.Channel, error)
+
+	ExecutionCount(ctx context.Context, obj *ent.Request) (int, error)
 }
 type RequestExecutionResolver interface {
 	ID(ctx context.Context, obj *ent.RequestExecution) (*objects.GUID, error)
@@ -1909,6 +1922,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Channel.DeletedAt(childComplexity), true
+	case "Channel.disableInfo":
+		if e.complexity.Channel.DisableInfo == nil {
+			break
+		}
+
+		return e.complexity.Channel.DisableInfo(childComplexity), true
 	case "Channel.errorMessage":
 		if e.complexity.Channel.ErrorMessage == nil {
 			break
@@ -2046,6 +2065,43 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.ChannelCredentials.GCP(childComplexity), true
+
+	case "ChannelDisableInfo.disabledAt":
+		if e.complexity.ChannelDisableInfo.DisabledAt == nil {
+			break
+		}
+
+		return e.complexity.ChannelDisableInfo.DisabledAt(childComplexity), true
+	case "ChannelDisableInfo.disabledBy":
+		if e.complexity.ChannelDisableInfo.DisabledBy == nil {
+			break
+		}
+
+		return e.complexity.ChannelDisableInfo.DisabledBy(childComplexity), true
+	case "ChannelDisableInfo.errorCode":
+		if e.complexity.ChannelDisableInfo.ErrorCode == nil {
+			break
+		}
+
+		return e.complexity.ChannelDisableInfo.ErrorCode(childComplexity), true
+	case "ChannelDisableInfo.errorCount":
+		if e.complexity.ChannelDisableInfo.ErrorCount == nil {
+			break
+		}
+
+		return e.complexity.ChannelDisableInfo.ErrorCount(childComplexity), true
+	case "ChannelDisableInfo.message":
+		if e.complexity.ChannelDisableInfo.Message == nil {
+			break
+		}
+
+		return e.complexity.ChannelDisableInfo.Message(childComplexity), true
+	case "ChannelDisableInfo.type":
+		if e.complexity.ChannelDisableInfo.Type == nil {
+			break
+		}
+
+		return e.complexity.ChannelDisableInfo.Type(childComplexity), true
 
 	case "ChannelEdge.cursor":
 		if e.complexity.ChannelEdge.Cursor == nil {
@@ -4829,6 +4885,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Request.DataStorageID(childComplexity), true
+	case "Request.executionCount":
+		if e.complexity.Request.ExecutionCount == nil {
+			break
+		}
+
+		return e.complexity.Request.ExecutionCount(childComplexity), true
 	case "Request.executions":
 		if e.complexity.Request.Executions == nil {
 			break
@@ -6813,6 +6875,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputBulkImportChannelsInput,
 		ec.unmarshalInputBulkUpdateChannelOrderingInput,
 		ec.unmarshalInputChannelCredentialsInput,
+		ec.unmarshalInputChannelDisableInfoInput,
 		ec.unmarshalInputChannelModelAssociationInput,
 		ec.unmarshalInputChannelOrder,
 		ec.unmarshalInputChannelOrderingItem,
@@ -10541,6 +10604,8 @@ func (ec *executionContext) fieldContext_ApplyChannelOverrideTemplatePayload_cha
 				return ec.fieldContext_Channel_orderingWeight(ctx, field)
 			case "errorMessage":
 				return ec.fieldContext_Channel_errorMessage(ctx, field)
+			case "disableInfo":
+				return ec.fieldContext_Channel_disableInfo(ctx, field)
 			case "remark":
 				return ec.fieldContext_Channel_remark(ctx, field)
 			case "requests":
@@ -11001,6 +11066,8 @@ func (ec *executionContext) fieldContext_BulkImportChannelsResult_channels(_ con
 				return ec.fieldContext_Channel_orderingWeight(ctx, field)
 			case "errorMessage":
 				return ec.fieldContext_Channel_errorMessage(ctx, field)
+			case "disableInfo":
+				return ec.fieldContext_Channel_disableInfo(ctx, field)
 			case "remark":
 				return ec.fieldContext_Channel_remark(ctx, field)
 			case "requests":
@@ -11136,6 +11203,8 @@ func (ec *executionContext) fieldContext_BulkUpdateChannelOrderingResult_channel
 				return ec.fieldContext_Channel_orderingWeight(ctx, field)
 			case "errorMessage":
 				return ec.fieldContext_Channel_errorMessage(ctx, field)
+			case "disableInfo":
+				return ec.fieldContext_Channel_disableInfo(ctx, field)
 			case "remark":
 				return ec.fieldContext_Channel_remark(ctx, field)
 			case "requests":
@@ -11609,6 +11678,49 @@ func (ec *executionContext) fieldContext_Channel_errorMessage(_ context.Context,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Channel_disableInfo(ctx context.Context, field graphql.CollectedField, obj *ent.Channel) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Channel_disableInfo,
+		func(ctx context.Context) (any, error) {
+			return obj.DisableInfo, nil
+		},
+		nil,
+		ec.marshalOChannelDisableInfo2ᚖgithubᚗcomᚋloopljᚋaxonhubᚋinternalᚋobjectsᚐChannelDisableInfo,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Channel_disableInfo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Channel",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "type":
+				return ec.fieldContext_ChannelDisableInfo_type(ctx, field)
+			case "message":
+				return ec.fieldContext_ChannelDisableInfo_message(ctx, field)
+			case "errorCode":
+				return ec.fieldContext_ChannelDisableInfo_errorCode(ctx, field)
+			case "errorCount":
+				return ec.fieldContext_ChannelDisableInfo_errorCount(ctx, field)
+			case "disabledAt":
+				return ec.fieldContext_ChannelDisableInfo_disabledAt(ctx, field)
+			case "disabledBy":
+				return ec.fieldContext_ChannelDisableInfo_disabledBy(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ChannelDisableInfo", field.Name)
 		},
 	}
 	return fc, nil
@@ -12192,6 +12304,180 @@ func (ec *executionContext) fieldContext_ChannelCredentials_gcp(_ context.Contex
 	return fc, nil
 }
 
+func (ec *executionContext) _ChannelDisableInfo_type(ctx context.Context, field graphql.CollectedField, obj *objects.ChannelDisableInfo) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ChannelDisableInfo_type,
+		func(ctx context.Context) (any, error) {
+			return obj.Type, nil
+		},
+		nil,
+		ec.marshalNDisableReasonType2githubᚗcomᚋloopljᚋaxonhubᚋinternalᚋobjectsᚐDisableReasonType,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ChannelDisableInfo_type(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ChannelDisableInfo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type DisableReasonType does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ChannelDisableInfo_message(ctx context.Context, field graphql.CollectedField, obj *objects.ChannelDisableInfo) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ChannelDisableInfo_message,
+		func(ctx context.Context) (any, error) {
+			return obj.Message, nil
+		},
+		nil,
+		ec.marshalOString2string,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_ChannelDisableInfo_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ChannelDisableInfo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ChannelDisableInfo_errorCode(ctx context.Context, field graphql.CollectedField, obj *objects.ChannelDisableInfo) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ChannelDisableInfo_errorCode,
+		func(ctx context.Context) (any, error) {
+			return obj.ErrorCode, nil
+		},
+		nil,
+		ec.marshalOInt2int,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_ChannelDisableInfo_errorCode(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ChannelDisableInfo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ChannelDisableInfo_errorCount(ctx context.Context, field graphql.CollectedField, obj *objects.ChannelDisableInfo) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ChannelDisableInfo_errorCount,
+		func(ctx context.Context) (any, error) {
+			return obj.ErrorCount, nil
+		},
+		nil,
+		ec.marshalOInt2int,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_ChannelDisableInfo_errorCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ChannelDisableInfo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ChannelDisableInfo_disabledAt(ctx context.Context, field graphql.CollectedField, obj *objects.ChannelDisableInfo) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ChannelDisableInfo_disabledAt,
+		func(ctx context.Context) (any, error) {
+			return obj.DisabledAt, nil
+		},
+		nil,
+		ec.marshalOInt2int64,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_ChannelDisableInfo_disabledAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ChannelDisableInfo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ChannelDisableInfo_disabledBy(ctx context.Context, field graphql.CollectedField, obj *objects.ChannelDisableInfo) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ChannelDisableInfo_disabledBy,
+		func(ctx context.Context) (any, error) {
+			return obj.DisabledBy, nil
+		},
+		nil,
+		ec.marshalOInt2int,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_ChannelDisableInfo_disabledBy(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ChannelDisableInfo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _ChannelEdge_node(ctx context.Context, field graphql.CollectedField, obj *ent.ChannelEdge) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -12246,6 +12532,8 @@ func (ec *executionContext) fieldContext_ChannelEdge_node(_ context.Context, fie
 				return ec.fieldContext_Channel_orderingWeight(ctx, field)
 			case "errorMessage":
 				return ec.fieldContext_Channel_errorMessage(ctx, field)
+			case "disableInfo":
+				return ec.fieldContext_Channel_disableInfo(ctx, field)
 			case "remark":
 				return ec.fieldContext_Channel_remark(ctx, field)
 			case "requests":
@@ -13712,6 +14000,8 @@ func (ec *executionContext) fieldContext_ChannelPerformance_channel(_ context.Co
 				return ec.fieldContext_Channel_orderingWeight(ctx, field)
 			case "errorMessage":
 				return ec.fieldContext_Channel_errorMessage(ctx, field)
+			case "disableInfo":
+				return ec.fieldContext_Channel_disableInfo(ctx, field)
 			case "remark":
 				return ec.fieldContext_Channel_remark(ctx, field)
 			case "requests":
@@ -13934,6 +14224,8 @@ func (ec *executionContext) fieldContext_ChannelProbe_channel(_ context.Context,
 				return ec.fieldContext_Channel_orderingWeight(ctx, field)
 			case "errorMessage":
 				return ec.fieldContext_Channel_errorMessage(ctx, field)
+			case "disableInfo":
+				return ec.fieldContext_Channel_disableInfo(ctx, field)
 			case "remark":
 				return ec.fieldContext_Channel_remark(ctx, field)
 			case "requests":
@@ -17831,6 +18123,8 @@ func (ec *executionContext) fieldContext_ModelChannelConnection_channel(_ contex
 				return ec.fieldContext_Channel_orderingWeight(ctx, field)
 			case "errorMessage":
 				return ec.fieldContext_Channel_errorMessage(ctx, field)
+			case "disableInfo":
+				return ec.fieldContext_Channel_disableInfo(ctx, field)
 			case "remark":
 				return ec.fieldContext_Channel_remark(ctx, field)
 			case "requests":
@@ -18426,6 +18720,8 @@ func (ec *executionContext) fieldContext_Mutation_createChannel(ctx context.Cont
 				return ec.fieldContext_Channel_orderingWeight(ctx, field)
 			case "errorMessage":
 				return ec.fieldContext_Channel_errorMessage(ctx, field)
+			case "disableInfo":
+				return ec.fieldContext_Channel_disableInfo(ctx, field)
 			case "remark":
 				return ec.fieldContext_Channel_remark(ctx, field)
 			case "requests":
@@ -18515,6 +18811,8 @@ func (ec *executionContext) fieldContext_Mutation_bulkCreateChannels(ctx context
 				return ec.fieldContext_Channel_orderingWeight(ctx, field)
 			case "errorMessage":
 				return ec.fieldContext_Channel_errorMessage(ctx, field)
+			case "disableInfo":
+				return ec.fieldContext_Channel_disableInfo(ctx, field)
 			case "remark":
 				return ec.fieldContext_Channel_remark(ctx, field)
 			case "requests":
@@ -18604,6 +18902,8 @@ func (ec *executionContext) fieldContext_Mutation_updateChannel(ctx context.Cont
 				return ec.fieldContext_Channel_orderingWeight(ctx, field)
 			case "errorMessage":
 				return ec.fieldContext_Channel_errorMessage(ctx, field)
+			case "disableInfo":
+				return ec.fieldContext_Channel_disableInfo(ctx, field)
 			case "remark":
 				return ec.fieldContext_Channel_remark(ctx, field)
 			case "requests":
@@ -18693,6 +18993,8 @@ func (ec *executionContext) fieldContext_Mutation_updateChannelStatus(ctx contex
 				return ec.fieldContext_Channel_orderingWeight(ctx, field)
 			case "errorMessage":
 				return ec.fieldContext_Channel_errorMessage(ctx, field)
+			case "disableInfo":
+				return ec.fieldContext_Channel_disableInfo(ctx, field)
 			case "remark":
 				return ec.fieldContext_Channel_remark(ctx, field)
 			case "requests":
@@ -27170,6 +27472,8 @@ func (ec *executionContext) fieldContext_Request_channel(_ context.Context, fiel
 				return ec.fieldContext_Channel_orderingWeight(ctx, field)
 			case "errorMessage":
 				return ec.fieldContext_Channel_errorMessage(ctx, field)
+			case "disableInfo":
+				return ec.fieldContext_Channel_disableInfo(ctx, field)
 			case "remark":
 				return ec.fieldContext_Channel_remark(ctx, field)
 			case "requests":
@@ -27238,6 +27542,35 @@ func (ec *executionContext) fieldContext_Request_usageLogs(ctx context.Context, 
 	if fc.Args, err = ec.field_Request_usageLogs_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Request_executionCount(ctx context.Context, field graphql.CollectedField, obj *ent.Request) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Request_executionCount,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Request().ExecutionCount(ctx, obj)
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Request_executionCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Request",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
 	}
 	return fc, nil
 }
@@ -27423,6 +27756,8 @@ func (ec *executionContext) fieldContext_RequestEdge_node(_ context.Context, fie
 				return ec.fieldContext_Request_channel(ctx, field)
 			case "usageLogs":
 				return ec.fieldContext_Request_usageLogs(ctx, field)
+			case "executionCount":
+				return ec.fieldContext_Request_executionCount(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Request", field.Name)
 		},
@@ -28088,6 +28423,8 @@ func (ec *executionContext) fieldContext_RequestExecution_request(_ context.Cont
 				return ec.fieldContext_Request_channel(ctx, field)
 			case "usageLogs":
 				return ec.fieldContext_Request_usageLogs(ctx, field)
+			case "executionCount":
+				return ec.fieldContext_Request_executionCount(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Request", field.Name)
 		},
@@ -28149,6 +28486,8 @@ func (ec *executionContext) fieldContext_RequestExecution_channel(_ context.Cont
 				return ec.fieldContext_Channel_orderingWeight(ctx, field)
 			case "errorMessage":
 				return ec.fieldContext_Channel_errorMessage(ctx, field)
+			case "disableInfo":
+				return ec.fieldContext_Channel_disableInfo(ctx, field)
 			case "remark":
 				return ec.fieldContext_Channel_remark(ctx, field)
 			case "requests":
@@ -33931,6 +34270,8 @@ func (ec *executionContext) fieldContext_UnassociatedChannel_channel(_ context.C
 				return ec.fieldContext_Channel_orderingWeight(ctx, field)
 			case "errorMessage":
 				return ec.fieldContext_Channel_errorMessage(ctx, field)
+			case "disableInfo":
+				return ec.fieldContext_Channel_disableInfo(ctx, field)
 			case "remark":
 				return ec.fieldContext_Channel_remark(ctx, field)
 			case "requests":
@@ -34612,6 +34953,8 @@ func (ec *executionContext) fieldContext_UsageLog_request(_ context.Context, fie
 				return ec.fieldContext_Request_channel(ctx, field)
 			case "usageLogs":
 				return ec.fieldContext_Request_usageLogs(ctx, field)
+			case "executionCount":
+				return ec.fieldContext_Request_executionCount(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Request", field.Name)
 		},
@@ -34736,6 +35079,8 @@ func (ec *executionContext) fieldContext_UsageLog_channel(_ context.Context, fie
 				return ec.fieldContext_Channel_orderingWeight(ctx, field)
 			case "errorMessage":
 				return ec.fieldContext_Channel_errorMessage(ctx, field)
+			case "disableInfo":
+				return ec.fieldContext_Channel_disableInfo(ctx, field)
 			case "remark":
 				return ec.fieldContext_Channel_remark(ctx, field)
 			case "requests":
@@ -39680,6 +40025,68 @@ func (ec *executionContext) unmarshalInputChannelCredentialsInput(ctx context.Co
 				return it, err
 			}
 			it.GCP = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputChannelDisableInfoInput(ctx context.Context, obj any) (objects.ChannelDisableInfo, error) {
+	var it objects.ChannelDisableInfo
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"type", "message", "errorCode", "errorCount", "disabledAt", "disabledBy"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "type":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
+			data, err := ec.unmarshalNDisableReasonType2githubᚗcomᚋloopljᚋaxonhubᚋinternalᚋobjectsᚐDisableReasonType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Type = data
+		case "message":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("message"))
+			data, err := ec.unmarshalOString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Message = data
+		case "errorCode":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("errorCode"))
+			data, err := ec.unmarshalOInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ErrorCode = data
+		case "errorCount":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("errorCount"))
+			data, err := ec.unmarshalOInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ErrorCount = data
+		case "disabledAt":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("disabledAt"))
+			data, err := ec.unmarshalOInt2int64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DisabledAt = data
+		case "disabledBy":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("disabledBy"))
+			data, err := ec.unmarshalOInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DisabledBy = data
 		}
 	}
 
@@ -53576,7 +53983,7 @@ func (ec *executionContext) unmarshalInputUpdateChannelInput(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"baseURL", "clearBaseURL", "name", "status", "credentials", "supportedModels", "appendSupportedModels", "autoSyncSupportedModels", "tags", "appendTags", "clearTags", "defaultTestModel", "settings", "clearSettings", "orderingWeight", "errorMessage", "clearErrorMessage", "remark", "clearRemark"}
+	fieldsInOrder := [...]string{"baseURL", "clearBaseURL", "name", "status", "credentials", "supportedModels", "appendSupportedModels", "autoSyncSupportedModels", "tags", "appendTags", "clearTags", "defaultTestModel", "settings", "clearSettings", "orderingWeight", "errorMessage", "clearErrorMessage", "disableInfo", "clearDisableInfo", "remark", "clearRemark"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -53702,6 +54109,20 @@ func (ec *executionContext) unmarshalInputUpdateChannelInput(ctx context.Context
 				return it, err
 			}
 			it.ClearErrorMessage = data
+		case "disableInfo":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("disableInfo"))
+			data, err := ec.unmarshalOChannelDisableInfoInput2ᚖgithubᚗcomᚋloopljᚋaxonhubᚋinternalᚋobjectsᚐChannelDisableInfo(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DisableInfo = data
+		case "clearDisableInfo":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("clearDisableInfo"))
+			data, err := ec.unmarshalOBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ClearDisableInfo = data
 		case "remark":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("remark"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
@@ -59107,6 +59528,8 @@ func (ec *executionContext) _Channel(ctx context.Context, sel ast.SelectionSet, 
 			}
 		case "errorMessage":
 			out.Values[i] = ec._Channel_errorMessage(ctx, field, obj)
+		case "disableInfo":
+			out.Values[i] = ec._Channel_disableInfo(ctx, field, obj)
 		case "remark":
 			out.Values[i] = ec._Channel_remark(ctx, field, obj)
 		case "requests":
@@ -59438,6 +59861,55 @@ func (ec *executionContext) _ChannelCredentials(ctx context.Context, sel ast.Sel
 			out.Values[i] = ec._ChannelCredentials_aws(ctx, field, obj)
 		case "gcp":
 			out.Values[i] = ec._ChannelCredentials_gcp(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var channelDisableInfoImplementors = []string{"ChannelDisableInfo"}
+
+func (ec *executionContext) _ChannelDisableInfo(ctx context.Context, sel ast.SelectionSet, obj *objects.ChannelDisableInfo) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, channelDisableInfoImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ChannelDisableInfo")
+		case "type":
+			out.Values[i] = ec._ChannelDisableInfo_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "message":
+			out.Values[i] = ec._ChannelDisableInfo_message(ctx, field, obj)
+		case "errorCode":
+			out.Values[i] = ec._ChannelDisableInfo_errorCode(ctx, field, obj)
+		case "errorCount":
+			out.Values[i] = ec._ChannelDisableInfo_errorCount(ctx, field, obj)
+		case "disabledAt":
+			out.Values[i] = ec._ChannelDisableInfo_disabledAt(ctx, field, obj)
+		case "disabledBy":
+			out.Values[i] = ec._ChannelDisableInfo_disabledBy(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -65579,6 +66051,42 @@ func (ec *executionContext) _Request(ctx context.Context, sel ast.SelectionSet, 
 					}
 				}()
 				res = ec._Request_usageLogs(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "executionCount":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Request_executionCount(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -72132,6 +72640,23 @@ func (ec *executionContext) unmarshalNDataStorageWhereInput2ᚖgithubᚗcomᚋlo
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNDisableReasonType2githubᚗcomᚋloopljᚋaxonhubᚋinternalᚋobjectsᚐDisableReasonType(ctx context.Context, v any) (objects.DisableReasonType, error) {
+	tmp, err := graphql.UnmarshalString(v)
+	res := objects.DisableReasonType(tmp)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNDisableReasonType2githubᚗcomᚋloopljᚋaxonhubᚋinternalᚋobjectsᚐDisableReasonType(ctx context.Context, sel ast.SelectionSet, v objects.DisableReasonType) graphql.Marshaler {
+	_ = sel
+	res := graphql.MarshalString(string(v))
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
 func (ec *executionContext) marshalNExcludeAssociation2ᚖgithubᚗcomᚋloopljᚋaxonhubᚋinternalᚋobjectsᚐExcludeAssociation(ctx context.Context, sel ast.SelectionSet, v *objects.ExcludeAssociation) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -75042,6 +75567,21 @@ func (ec *executionContext) unmarshalOChannelCredentialsInput2ᚖgithubᚗcomᚋ
 		return nil, nil
 	}
 	res, err := ec.unmarshalInputChannelCredentialsInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOChannelDisableInfo2ᚖgithubᚗcomᚋloopljᚋaxonhubᚋinternalᚋobjectsᚐChannelDisableInfo(ctx context.Context, sel ast.SelectionSet, v *objects.ChannelDisableInfo) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._ChannelDisableInfo(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOChannelDisableInfoInput2ᚖgithubᚗcomᚋloopljᚋaxonhubᚋinternalᚋobjectsᚐChannelDisableInfo(ctx context.Context, v any) (*objects.ChannelDisableInfo, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputChannelDisableInfoInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 

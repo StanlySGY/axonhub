@@ -1234,6 +1234,7 @@ type ChannelMutation struct {
 	ordering_weight            *int
 	addordering_weight         *int
 	error_message              *string
+	disable_info               **objects.ChannelDisableInfo
 	remark                     *string
 	clearedFields              map[string]struct{}
 	requests                   map[int]struct{}
@@ -2016,6 +2017,55 @@ func (m *ChannelMutation) ResetErrorMessage() {
 	delete(m.clearedFields, channel.FieldErrorMessage)
 }
 
+// SetDisableInfo sets the "disable_info" field.
+func (m *ChannelMutation) SetDisableInfo(odi *objects.ChannelDisableInfo) {
+	m.disable_info = &odi
+}
+
+// DisableInfo returns the value of the "disable_info" field in the mutation.
+func (m *ChannelMutation) DisableInfo() (r *objects.ChannelDisableInfo, exists bool) {
+	v := m.disable_info
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDisableInfo returns the old "disable_info" field's value of the Channel entity.
+// If the Channel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ChannelMutation) OldDisableInfo(ctx context.Context) (v *objects.ChannelDisableInfo, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDisableInfo is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDisableInfo requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDisableInfo: %w", err)
+	}
+	return oldValue.DisableInfo, nil
+}
+
+// ClearDisableInfo clears the value of the "disable_info" field.
+func (m *ChannelMutation) ClearDisableInfo() {
+	m.disable_info = nil
+	m.clearedFields[channel.FieldDisableInfo] = struct{}{}
+}
+
+// DisableInfoCleared returns if the "disable_info" field was cleared in this mutation.
+func (m *ChannelMutation) DisableInfoCleared() bool {
+	_, ok := m.clearedFields[channel.FieldDisableInfo]
+	return ok
+}
+
+// ResetDisableInfo resets all changes to the "disable_info" field.
+func (m *ChannelMutation) ResetDisableInfo() {
+	m.disable_info = nil
+	delete(m.clearedFields, channel.FieldDisableInfo)
+}
+
 // SetRemark sets the "remark" field.
 func (m *ChannelMutation) SetRemark(s string) {
 	m.remark = &s
@@ -2354,7 +2404,7 @@ func (m *ChannelMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ChannelMutation) Fields() []string {
-	fields := make([]string, 0, 16)
+	fields := make([]string, 0, 17)
 	if m.created_at != nil {
 		fields = append(fields, channel.FieldCreatedAt)
 	}
@@ -2400,6 +2450,9 @@ func (m *ChannelMutation) Fields() []string {
 	if m.error_message != nil {
 		fields = append(fields, channel.FieldErrorMessage)
 	}
+	if m.disable_info != nil {
+		fields = append(fields, channel.FieldDisableInfo)
+	}
 	if m.remark != nil {
 		fields = append(fields, channel.FieldRemark)
 	}
@@ -2441,6 +2494,8 @@ func (m *ChannelMutation) Field(name string) (ent.Value, bool) {
 		return m.OrderingWeight()
 	case channel.FieldErrorMessage:
 		return m.ErrorMessage()
+	case channel.FieldDisableInfo:
+		return m.DisableInfo()
 	case channel.FieldRemark:
 		return m.Remark()
 	}
@@ -2482,6 +2537,8 @@ func (m *ChannelMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldOrderingWeight(ctx)
 	case channel.FieldErrorMessage:
 		return m.OldErrorMessage(ctx)
+	case channel.FieldDisableInfo:
+		return m.OldDisableInfo(ctx)
 	case channel.FieldRemark:
 		return m.OldRemark(ctx)
 	}
@@ -2598,6 +2655,13 @@ func (m *ChannelMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetErrorMessage(v)
 		return nil
+	case channel.FieldDisableInfo:
+		v, ok := value.(*objects.ChannelDisableInfo)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDisableInfo(v)
+		return nil
 	case channel.FieldRemark:
 		v, ok := value.(string)
 		if !ok {
@@ -2674,6 +2738,9 @@ func (m *ChannelMutation) ClearedFields() []string {
 	if m.FieldCleared(channel.FieldErrorMessage) {
 		fields = append(fields, channel.FieldErrorMessage)
 	}
+	if m.FieldCleared(channel.FieldDisableInfo) {
+		fields = append(fields, channel.FieldDisableInfo)
+	}
 	if m.FieldCleared(channel.FieldRemark) {
 		fields = append(fields, channel.FieldRemark)
 	}
@@ -2702,6 +2769,9 @@ func (m *ChannelMutation) ClearField(name string) error {
 		return nil
 	case channel.FieldErrorMessage:
 		m.ClearErrorMessage()
+		return nil
+	case channel.FieldDisableInfo:
+		m.ClearDisableInfo()
 		return nil
 	case channel.FieldRemark:
 		m.ClearRemark()
@@ -2758,6 +2828,9 @@ func (m *ChannelMutation) ResetField(name string) error {
 		return nil
 	case channel.FieldErrorMessage:
 		m.ResetErrorMessage()
+		return nil
+	case channel.FieldDisableInfo:
+		m.ResetDisableInfo()
 		return nil
 	case channel.FieldRemark:
 		m.ResetRemark()

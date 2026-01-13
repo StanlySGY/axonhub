@@ -120,3 +120,35 @@ type GCPCredentialsJSON struct {
 	ClientX509CertURL       string `json:"clientX509CertURL" validate:"required"`
 	UniverseDomain          string `json:"universeDomain" validate:"required"`
 }
+
+// DisableReasonType represents the type of reason for disabling a channel.
+type DisableReasonType string
+
+const (
+	// DisableReasonManual indicates the channel was manually disabled by a user.
+	DisableReasonManual DisableReasonType = "manual"
+	// DisableReasonAutoDisabled indicates the channel was auto-disabled due to errors.
+	DisableReasonAutoDisabled DisableReasonType = "auto_disabled"
+	// DisableReasonTestFailed indicates the channel was disabled due to test failure.
+	DisableReasonTestFailed DisableReasonType = "test_failed"
+	// DisableReasonQuotaExceeded indicates the channel was disabled due to quota exceeded.
+	DisableReasonQuotaExceeded DisableReasonType = "quota_exceeded"
+	// DisableReasonAuthFailed indicates the channel was disabled due to authentication failure.
+	DisableReasonAuthFailed DisableReasonType = "auth_failed"
+)
+
+// ChannelDisableInfo contains structured information about why a channel was disabled.
+type ChannelDisableInfo struct {
+	// Type is the reason type for disabling the channel.
+	Type DisableReasonType `json:"type"`
+	// Message is a human-readable description of the disable reason.
+	Message string `json:"message,omitempty"`
+	// ErrorCode is the HTTP status code that triggered the disable (if applicable).
+	ErrorCode int `json:"errorCode,omitempty"`
+	// ErrorCount is the number of consecutive errors before disable.
+	ErrorCount int `json:"errorCount,omitempty"`
+	// DisabledAt is the timestamp when the channel was disabled.
+	DisabledAt int64 `json:"disabledAt,omitempty"`
+	// DisabledBy is the user ID who disabled the channel (for manual disable).
+	DisabledBy int `json:"disabledBy,omitempty"`
+}

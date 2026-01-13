@@ -16,6 +16,7 @@ import (
 	"github.com/looplj/axonhub/internal/ent/channel"
 	"github.com/looplj/axonhub/internal/ent/project"
 	"github.com/looplj/axonhub/internal/ent/request"
+	"github.com/looplj/axonhub/internal/ent/requestexecution"
 	"github.com/looplj/axonhub/internal/ent/user"
 	"github.com/looplj/axonhub/internal/objects"
 	"github.com/looplj/axonhub/internal/scopes"
@@ -435,6 +436,18 @@ func (r *queryResolver) QueryChannelOverrideTemplates(ctx context.Context, input
 	}
 
 	return r.channelOverrideTemplateService.QueryTemplates(ctx, bizInput)
+}
+
+// ExecutionCount is the resolver for the executionCount field.
+func (r *requestResolver) ExecutionCount(ctx context.Context, obj *ent.Request) (int, error) {
+	count, err := r.client.RequestExecution.Query().
+		Where(requestexecution.RequestIDEQ(obj.ID)).
+		Count(ctx)
+	if err != nil {
+		return 0, fmt.Errorf("failed to count executions: %w", err)
+	}
+
+	return count, nil
 }
 
 // ID is the resolver for the id field.

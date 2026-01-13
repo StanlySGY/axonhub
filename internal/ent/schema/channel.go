@@ -107,6 +107,12 @@ func (Channel) Fields() []ent.Field {
 			Annotations(
 				entgql.Skip(entgql.SkipMutationCreateInput),
 			),
+		field.JSON("disable_info", &objects.ChannelDisableInfo{}).
+			Optional().
+			Comment("Structured information about why the channel was disabled").
+			Annotations(
+				entgql.Skip(entgql.SkipMutationCreateInput),
+			),
 		field.String("remark").
 			Optional().Nillable().
 			Comment("User-defined remark or note for the channel"),

@@ -182,7 +182,7 @@ func (_m *Channel) Node(ctx context.Context) (node *Node, err error) {
 	node = &Node{
 		ID:     _m.ID,
 		Type:   "Channel",
-		Fields: make([]*Field, 16),
+		Fields: make([]*Field, 17),
 		Edges:  make([]*Edge, 5),
 	}
 	var buf []byte
@@ -306,10 +306,18 @@ func (_m *Channel) Node(ctx context.Context) (node *Node, err error) {
 		Name:  "error_message",
 		Value: string(buf),
 	}
-	if buf, err = json.Marshal(_m.Remark); err != nil {
+	if buf, err = json.Marshal(_m.DisableInfo); err != nil {
 		return nil, err
 	}
 	node.Fields[15] = &Field{
+		Type:  "*objects.ChannelDisableInfo",
+		Name:  "disable_info",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(_m.Remark); err != nil {
+		return nil, err
+	}
+	node.Fields[16] = &Field{
 		Type:  "string",
 		Name:  "remark",
 		Value: string(buf),

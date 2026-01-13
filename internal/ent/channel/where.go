@@ -615,6 +615,16 @@ func ErrorMessageContainsFold(v string) predicate.Channel {
 	return predicate.Channel(sql.FieldContainsFold(FieldErrorMessage, v))
 }
 
+// DisableInfoIsNil applies the IsNil predicate on the "disable_info" field.
+func DisableInfoIsNil() predicate.Channel {
+	return predicate.Channel(sql.FieldIsNull(FieldDisableInfo))
+}
+
+// DisableInfoNotNil applies the NotNil predicate on the "disable_info" field.
+func DisableInfoNotNil() predicate.Channel {
+	return predicate.Channel(sql.FieldNotNull(FieldDisableInfo))
+}
+
 // RemarkEQ applies the EQ predicate on the "remark" field.
 func RemarkEQ(v string) predicate.Channel {
 	return predicate.Channel(sql.FieldEQ(FieldRemark, v))

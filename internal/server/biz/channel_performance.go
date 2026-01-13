@@ -13,6 +13,7 @@ import (
 	"github.com/looplj/axonhub/internal/ent/channelperformance"
 	"github.com/looplj/axonhub/internal/ent/privacy"
 	"github.com/looplj/axonhub/internal/log"
+	"github.com/looplj/axonhub/internal/objects"
 	"github.com/looplj/axonhub/internal/pkg/ringbuffer"
 	"github.com/looplj/axonhub/internal/pkg/xcontext"
 )
@@ -424,14 +425,27 @@ func (svc *ChannelService) RecordMetrics(ctx context.Context, channelID int, met
 }
 
 func (svc *ChannelService) markChannelUnavailable(ctx context.Context, channelID int, errorStatusCode int) {
+	svc.markChannelUnavailableWithInfo(ctx, channelID, errorStatusCode, 1)
+}
+
+func (svc *ChannelService) markChannelUnavailableWithInfo(ctx context.Context, channelID int, errorStatusCode int, errorCount int) {
 	ctx, cancel := xcontext.DetachWithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
 	ctx = privacy.DecisionContext(ctx, privacy.Allow)
 
+	disableInfo := &objects.ChannelDisableInfo{
+		Type:       objects.DisableReasonAutoDisabled,
+		Message:    deriveErrorMessage(errorStatusCode),
+		ErrorCode:  errorStatusCode,
+		ErrorCount: errorCount,
+		DisabledAt: time.Now().Unix(),
+	}
+
 	_, err := svc.db.Channel.UpdateOneID(channelID).
 		SetStatus(channel.StatusDisabled).
 		SetErrorMessage(deriveErrorMessage(errorStatusCode)).
+		SetDisableInfo(disableInfo).
 		Save(ctx)
 	if err != nil {
 		log.Error(ctx, "Failed to disable channel on unrecoverable error",
@@ -446,6 +460,7 @@ func (svc *ChannelService) markChannelUnavailable(ctx context.Context, channelID
 	log.Warn(ctx, "Channel disabled due to unrecoverable error",
 		log.Int("channel_id", channelID),
 		log.Int("error_code", errorStatusCode),
+		log.Int("error_count", errorCount),
 	)
 }
 
@@ -467,7 +482,7 @@ func (svc *ChannelService) checkAndHandleChannelError(ctx context.Context, perf 
 		svc.channelErrorCountsLock.Unlock()
 
 		if count >= statusConfig.Times {
-			svc.markChannelUnavailable(ctx, perf.ChannelID, perf.ErrorStatusCode)
+			svc.markChannelUnavailableWithInfo(ctx, perf.ChannelID, perf.ErrorStatusCode, count)
 			svc.channelErrorCountsLock.Lock()
 			delete(svc.channelErrorCounts, perf.ChannelID)
 			svc.channelErrorCountsLock.Unlock()

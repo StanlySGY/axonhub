@@ -49,6 +49,8 @@ const (
 	FieldOrderingWeight = "ordering_weight"
 	// FieldErrorMessage holds the string denoting the error_message field in the database.
 	FieldErrorMessage = "error_message"
+	// FieldDisableInfo holds the string denoting the disable_info field in the database.
+	FieldDisableInfo = "disable_info"
 	// FieldRemark holds the string denoting the remark field in the database.
 	FieldRemark = "remark"
 	// EdgeRequests holds the string denoting the requests edge name in mutations.
@@ -118,6 +120,7 @@ var Columns = []string{
 	FieldSettings,
 	FieldOrderingWeight,
 	FieldErrorMessage,
+	FieldDisableInfo,
 	FieldRemark,
 }
 

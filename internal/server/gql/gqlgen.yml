@@ -160,6 +160,15 @@ models:
   GCPCredentialInput:
     model:
       - github.com/looplj/axonhub/internal/objects.GCPCredential
+  ChannelDisableInfo:
+    model:
+      - github.com/looplj/axonhub/internal/objects.ChannelDisableInfo
+  ChannelDisableInfoInput:
+    model:
+      - github.com/looplj/axonhub/internal/objects.ChannelDisableInfo
+  DisableReasonType:
+    model:
+      - github.com/looplj/axonhub/internal/objects.DisableReasonType
   JSONRawMessage:
     model:
       - github.com/looplj/axonhub/internal/objects.JSONRawMessage

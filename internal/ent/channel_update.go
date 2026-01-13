@@ -228,6 +228,18 @@ func (_u *ChannelUpdate) ClearErrorMessage() *ChannelUpdate {
 	return _u
 }
 
+// SetDisableInfo sets the "disable_info" field.
+func (_u *ChannelUpdate) SetDisableInfo(v *objects.ChannelDisableInfo) *ChannelUpdate {
+	_u.mutation.SetDisableInfo(v)
+	return _u
+}
+
+// ClearDisableInfo clears the value of the "disable_info" field.
+func (_u *ChannelUpdate) ClearDisableInfo() *ChannelUpdate {
+	_u.mutation.ClearDisableInfo()
+	return _u
+}
+
 // SetRemark sets the "remark" field.
 func (_u *ChannelUpdate) SetRemark(v string) *ChannelUpdate {
 	_u.mutation.SetRemark(v)
@@ -558,6 +570,12 @@ func (_u *ChannelUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.ErrorMessageCleared() {
 		_spec.ClearField(channel.FieldErrorMessage, field.TypeString)
+	}
+	if value, ok := _u.mutation.DisableInfo(); ok {
+		_spec.SetField(channel.FieldDisableInfo, field.TypeJSON, value)
+	}
+	if _u.mutation.DisableInfoCleared() {
+		_spec.ClearField(channel.FieldDisableInfo, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.Remark(); ok {
 		_spec.SetField(channel.FieldRemark, field.TypeString, value)
@@ -988,6 +1006,18 @@ func (_u *ChannelUpdateOne) ClearErrorMessage() *ChannelUpdateOne {
 	return _u
 }
 
+// SetDisableInfo sets the "disable_info" field.
+func (_u *ChannelUpdateOne) SetDisableInfo(v *objects.ChannelDisableInfo) *ChannelUpdateOne {
+	_u.mutation.SetDisableInfo(v)
+	return _u
+}
+
+// ClearDisableInfo clears the value of the "disable_info" field.
+func (_u *ChannelUpdateOne) ClearDisableInfo() *ChannelUpdateOne {
+	_u.mutation.ClearDisableInfo()
+	return _u
+}
+
 // SetRemark sets the "remark" field.
 func (_u *ChannelUpdateOne) SetRemark(v string) *ChannelUpdateOne {
 	_u.mutation.SetRemark(v)
@@ -1348,6 +1378,12 @@ func (_u *ChannelUpdateOne) sqlSave(ctx context.Context) (_node *Channel, err er
 	}
 	if _u.mutation.ErrorMessageCleared() {
 		_spec.ClearField(channel.FieldErrorMessage, field.TypeString)
+	}
+	if value, ok := _u.mutation.DisableInfo(); ok {
+		_spec.SetField(channel.FieldDisableInfo, field.TypeJSON, value)
+	}
+	if _u.mutation.DisableInfoCleared() {
+		_spec.ClearField(channel.FieldDisableInfo, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.Remark(); ok {
 		_spec.SetField(channel.FieldRemark, field.TypeString, value)

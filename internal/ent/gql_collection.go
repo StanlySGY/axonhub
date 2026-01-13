@@ -671,6 +671,11 @@ func (_q *ChannelQuery) collectField(ctx context.Context, oneNode bool, opCtx *g
 				selectedFields = append(selectedFields, channel.FieldErrorMessage)
 				fieldSeen[channel.FieldErrorMessage] = struct{}{}
 			}
+		case "disableInfo":
+			if _, ok := fieldSeen[channel.FieldDisableInfo]; !ok {
+				selectedFields = append(selectedFields, channel.FieldDisableInfo)
+				fieldSeen[channel.FieldDisableInfo] = struct{}{}
+			}
 		case "remark":
 			if _, ok := fieldSeen[channel.FieldRemark]; !ok {
 				selectedFields = append(selectedFields, channel.FieldRemark)
