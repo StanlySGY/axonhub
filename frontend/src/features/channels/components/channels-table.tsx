@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -14,6 +14,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { motion, AnimatePresence } from 'framer-motion';
 import { IconArchive, IconBan, IconCheck, IconTrash, IconTemplate, IconX } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
@@ -279,6 +280,24 @@ export function ChannelsTable({
     }
   }, [data, rowSelection]);
 
+  // Virtualization setup
+  const parentRef = useRef<HTMLDivElement>(null);
+  const { rows } = table.getRowModel();
+
+  const virtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 60, // Estimated row height
+    overscan: 5,
+  });
+
+  const virtualRows = virtualizer.getVirtualItems();
+  const totalSize = virtualizer.getTotalSize();
+
+  // Padding for virtual scroll (table-safe method)
+  const paddingTop = virtualRows.length > 0 ? virtualRows[0].start : 0;
+  const paddingBottom = virtualRows.length > 0 ? totalSize - virtualRows[virtualRows.length - 1].end : 0;
+
   return (
     <div className='flex flex-1 flex-col overflow-hidden'>
       <DataTableToolbar
@@ -289,7 +308,7 @@ export function ChannelsTable({
         showErrorOnly={showErrorOnly}
         onExitErrorOnlyMode={onExitErrorOnlyMode}
       />
-      <div className='shadow-soft relative mt-4 flex-1 overflow-auto rounded-2xl border border-[var(--table-border)]'>
+      <div ref={parentRef} className='shadow-soft relative mt-4 flex-1 overflow-auto rounded-2xl border border-[var(--table-border)]'>
         <div className='min-w-max'>
         <Table data-testid='channels-table' className='border-separate border-spacing-0 rounded-2xl bg-[var(--table-background)]'>
           <TableHeader className='sticky top-0 z-20 bg-[var(--table-header)] shadow-sm'>
@@ -312,41 +331,50 @@ export function ChannelsTable({
           <TableBody className='space-y-1 !bg-[var(--table-background)] p-2'>
             {loading ? (
               <TableSkeleton rows={pageSize} columns={columns.length} />
-            ) : table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => {
-                const channel = row.original;
-                return (
-                  <React.Fragment key={row.id}>
-                    <MotionTableRow
-                      key={row.id}
-                      data-state={row.getIsSelected() && 'selected'}
-                      className='group/row table-row-hover rounded-xl border-0 !bg-[var(--table-background)] transition-all duration-200 ease-in-out'
-                    >
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id} className={`${cell.column.columnDef.meta?.className ?? ''} border-0 bg-inherit px-4 py-3`}>
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </TableCell>
-                      ))}
-                    </MotionTableRow>
-                    <AnimatePresence>
-                      {row.getIsExpanded() && (
-                        <TableRow key={`${row.id}-expanded`} className='border-0'>
-                          <TableCell colSpan={columns.length} className='p-0 border-0'>
-                            <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: 'auto', opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              transition={{ duration: 0.2, ease: 'easeInOut' }}
-                            >
-                              <ChannelExpandedRow channel={channel} columnsLength={columns.length} getApiFormatLabel={getApiFormatLabel} />
-                            </motion.div>
+            ) : rows.length ? (
+              <>
+                {paddingTop > 0 && (
+                  <tr style={{ height: paddingTop }} />
+                )}
+                {virtualRows.map((virtualRow) => {
+                  const row = rows[virtualRow.index];
+                  const channel = row.original;
+                  return (
+                    <React.Fragment key={row.id}>
+                      <MotionTableRow
+                        data-index={virtualRow.index}
+                        data-state={row.getIsSelected() && 'selected'}
+                        className='group/row table-row-hover rounded-xl border-0 !bg-[var(--table-background)] transition-all duration-200 ease-in-out'
+                      >
+                        {row.getVisibleCells().map((cell) => (
+                          <TableCell key={cell.id} className={`${cell.column.columnDef.meta?.className ?? ''} border-0 bg-inherit px-4 py-3`}>
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
                           </TableCell>
-                        </TableRow>
-                      )}
-                    </AnimatePresence>
-                  </React.Fragment>
-                );
-              })
+                        ))}
+                      </MotionTableRow>
+                      <AnimatePresence>
+                        {row.getIsExpanded() && (
+                          <TableRow key={`${row.id}-expanded`} className='border-0'>
+                            <TableCell colSpan={columns.length} className='p-0 border-0'>
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.2, ease: 'easeInOut' }}
+                              >
+                                <ChannelExpandedRow channel={channel} columnsLength={columns.length} getApiFormatLabel={getApiFormatLabel} />
+                              </motion.div>
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </AnimatePresence>
+                    </React.Fragment>
+                  );
+                })}
+                {paddingBottom > 0 && (
+                  <tr style={{ height: paddingBottom }} />
+                )}
+              </>
             ) : (
               <TableRow className='!bg-[var(--table-background)]'>
                 <TableCell colSpan={columns.length} className='h-24 !bg-[var(--table-background)] text-center'>
