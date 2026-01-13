@@ -473,7 +473,12 @@ var (
 			{
 				Name:    "request_executions_by_channel_id_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{RequestExecutionsColumns[16]},
+				Columns: []*schema.Column{RequestExecutionsColumns[16], RequestExecutionsColumns[1]},
+			},
+			{
+				Name:    "request_executions_by_project_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{RequestExecutionsColumns[3], RequestExecutionsColumns[1]},
 			},
 		},
 	}

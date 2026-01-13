@@ -35,6 +35,7 @@ import (
 	"github.com/looplj/axonhub/internal/ent/userproject"
 	"github.com/looplj/axonhub/internal/ent/userrole"
 	"github.com/looplj/axonhub/internal/server/biz"
+	"github.com/looplj/axonhub/llm/httpclient"
 )
 
 type Dependencies struct {
@@ -58,14 +59,18 @@ type Dependencies struct {
 	BackupService                  *biz.BackupService
 	ChannelProbeService            *biz.ChannelProbeService
 	PromptService                  *biz.PromptService
+	HttpClient                     *httpclient.HttpClient
 }
 
 type GraphqlHandler struct {
 	Graphql    http.Handler
 	Playground http.Handler
+	Loaders    *Loaders
 }
 
 func NewGraphqlHandlers(deps Dependencies) *GraphqlHandler {
+	loaders := NewLoaders(deps.Ent)
+
 	gqlSrv := handler.New(
 		NewSchema(
 			deps.Ent,
@@ -86,6 +91,7 @@ func NewGraphqlHandlers(deps Dependencies) *GraphqlHandler {
 			deps.BackupService,
 			deps.ChannelProbeService,
 			deps.PromptService,
+			deps.HttpClient,
 		),
 	)
 
@@ -113,6 +119,7 @@ func NewGraphqlHandlers(deps Dependencies) *GraphqlHandler {
 	return &GraphqlHandler{
 		Graphql:    gqlSrv,
 		Playground: playground.Handler("AxonHub", "/admin/graphql"),
+		Loaders:    loaders,
 	}
 }
 
@@ -176,6 +183,13 @@ func validatePaginationArgs(first, last *int) error {
 }
 
 func getNilableChannel(ctx context.Context, client *ent.Client, channelID int) (*ent.Channel, error) {
+	// Try to use dataloader if available
+	loaders := GetLoaders(ctx)
+	if loaders != nil {
+		return LoadChannel(ctx, channelID)
+	}
+
+	// Fallback to direct query if dataloader not available
 	if channelID == 0 {
 		return nil, nil
 	}

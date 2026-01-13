@@ -285,9 +285,16 @@ func (p *pipeline) Process(ctx context.Context, request *httpclient.Request) (*R
 				}
 			}
 
-			// Add retry delay if configured
+			// Add retry delay if configured, but respect context cancellation
 			if p.retryDelay > 0 {
-				time.Sleep(p.retryDelay)
+				timer := time.NewTimer(p.retryDelay)
+				select {
+				case <-ctx.Done():
+					timer.Stop()
+					return nil, ctx.Err()
+				case <-timer.C:
+					// Continue with retry
+				}
 			}
 		}
 

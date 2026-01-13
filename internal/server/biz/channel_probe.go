@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"entgo.io/ent/dialect/sql"
 	"github.com/samber/lo"
 	"github.com/zhenzou/executors"
 	"go.uber.org/fx"
@@ -108,7 +109,7 @@ func getIntervalMinutesFromFrequency(frequency ProbeFrequency) int {
 	}
 }
 
-// runProbe executes the probe task.
+// runProbe executes the probe task using GROUP BY for efficient aggregation.
 func (svc *ChannelProbeService) runProbe(ctx context.Context) {
 	// Check if probe is enabled
 	setting := svc.SystemService.ChannelSettingOrDefault(ctx)
@@ -165,63 +166,50 @@ func (svc *ChannelProbeService) runProbe(ctx context.Context) {
 
 	// Calculate time range based on frequency
 	startTime := alignedTime.Add(-time.Duration(intervalMinutes) * time.Minute)
+	channelIDs := lo.Map(channels, func(ch *ent.Channel, _ int) int { return ch.ID })
 
-	// Collect probe data for each channel
-	var probes []*ent.ChannelProbeCreate
-
-	for _, ch := range channels {
-		// Count total and success requests in the time range (excluding pending/processing requests)
-		total, err := svc.db.RequestExecution.Query().
-			Where(
-				requestexecution.ChannelIDEQ(ch.ID),
-				requestexecution.CreatedAtGTE(startTime),
-				requestexecution.CreatedAtLT(alignedTime),
-				requestexecution.StatusNotIn(requestexecution.StatusPending, requestexecution.StatusProcessing),
-			).
-			Count(ctx)
-		if err != nil {
-			log.Error(ctx, "Failed to count total requests",
-				log.Int("channel_id", ch.ID),
-				log.Cause(err),
-			)
-
-			continue
-		}
-
-		// Skip if total is 0 (optimization: don't store zero data)
-		if total == 0 {
-			continue
-		}
-
-		success, err := svc.db.RequestExecution.Query().
-			Where(
-				requestexecution.ChannelIDEQ(ch.ID),
-				requestexecution.CreatedAtGTE(startTime),
-				requestexecution.CreatedAtLT(alignedTime),
-				requestexecution.StatusEQ(requestexecution.StatusCompleted),
-			).
-			Count(ctx)
-		if err != nil {
-			log.Error(ctx, "Failed to count success requests",
-				log.Int("channel_id", ch.ID),
-				log.Cause(err),
-			)
-
-			continue
-		}
-
-		probes = append(probes, svc.db.ChannelProbe.Create().
-			SetChannelID(ch.ID).
-			SetTotalRequestCount(total).
-			SetSuccessRequestCount(success).
-			SetTimestamp(timestamp),
-		)
+	// Use GROUP BY to aggregate all channel stats in a single query
+	type channelStats struct {
+		ChannelID    int `json:"channel_id"`
+		TotalCount   int `json:"total_count"`
+		SuccessCount int `json:"success_count"`
 	}
 
-	if len(probes) == 0 {
+	var stats []channelStats
+
+	err = svc.db.RequestExecution.Query().
+		Where(
+			requestexecution.ChannelIDIn(channelIDs...),
+			requestexecution.CreatedAtGTE(startTime),
+			requestexecution.CreatedAtLT(alignedTime),
+			requestexecution.StatusNotIn(requestexecution.StatusPending, requestexecution.StatusProcessing),
+		).
+		Modify(func(s *sql.Selector) {
+			s.Select(
+				requestexecution.FieldChannelID,
+				sql.As(sql.Count("*"), "total_count"),
+				sql.As("SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END)", "success_count"),
+			).GroupBy(requestexecution.FieldChannelID)
+		}).
+		Scan(ctx, &stats)
+	if err != nil {
+		log.Error(ctx, "Failed to aggregate channel stats", log.Cause(err))
+		return
+	}
+
+	if len(stats) == 0 {
 		log.Debug(ctx, "No probe data to store (all channels have 0 requests)")
 		return
 	}
+
+	// Build probe creates from aggregated stats
+	probes := lo.Map(stats, func(s channelStats, _ int) *ent.ChannelProbeCreate {
+		return svc.db.ChannelProbe.Create().
+			SetChannelID(s.ChannelID).
+			SetTotalRequestCount(s.TotalCount).
+			SetSuccessRequestCount(s.SuccessCount).
+			SetTimestamp(timestamp)
+	})
 
 	// Bulk create probes
 	if err := svc.db.ChannelProbe.CreateBulk(probes...).Exec(ctx); err != nil {

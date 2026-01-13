@@ -57,8 +57,8 @@ func NewSchema(
 	backupService *biz.BackupService,
 	channelProbeService *biz.ChannelProbeService,
 	promptService *biz.PromptService,
+	httpClient *httpclient.HttpClient,
 ) graphql.ExecutableSchema {
-	httpClient := httpclient.NewHttpClient()
 	modelFetcher := biz.NewModelFetcher(httpClient, channelService)
 
 	return NewExecutableSchema(Config{

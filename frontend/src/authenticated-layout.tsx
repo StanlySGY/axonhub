@@ -5,6 +5,7 @@ import { useVersionCheck } from '@/hooks/use-version-check';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppHeader } from '@/components/layout/app-header';
 import { AppSidebar } from '@/components/layout/app-sidebar';
+import { MobileBottomNav } from '@/components/layout/mobile-bottom-nav';
 import SkipToMain from '@/components/skip-to-main';
 import { OnboardingProvider } from '@/features/onboarding';
 import { useSidebarData } from './sidebar';
@@ -34,6 +35,7 @@ export function AuthenticatedLayout({ children }: Props) {
             'peer-data-[state=expanded]:w-[calc(100%-var(--sidebar-width))]',
             'sm:transition-[width] sm:duration-200 sm:ease-linear',
             'flex min-h-0 min-w-0 flex-1 flex-col overflow-auto pt-14 has-[main.fixed-main]:overflow-hidden',
+            'pb-16 md:pb-0', // Add bottom padding for mobile nav
             'group-data-[scroll-locked=1]/body:h-full',
             'has-[main.fixed-main]:group-data-[scroll-locked=1]/body:h-svh'
           )}
@@ -41,6 +43,7 @@ export function AuthenticatedLayout({ children }: Props) {
           <OnboardingProvider>{children ? children : <Outlet />}</OnboardingProvider>
         </div>
       </div>
+      <MobileBottomNav />
     </SidebarProvider>
   );
 }

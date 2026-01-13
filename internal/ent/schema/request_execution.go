@@ -25,8 +25,12 @@ func (RequestExecution) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("request_id").
 			StorageKey("request_executions_by_request_id"),
-		index.Fields("channel_id").
+		// Composite index for channel performance queries (channel_id + created_at)
+		index.Fields("channel_id", "created_at").
 			StorageKey("request_executions_by_channel_id_created_at"),
+		// Composite index for project-scoped queries with time filtering
+		index.Fields("project_id", "created_at").
+			StorageKey("request_executions_by_project_id_created_at"),
 	}
 }
 

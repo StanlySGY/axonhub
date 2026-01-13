@@ -102,10 +102,25 @@ func getProxyFunc(config *ProxyConfig) func(*http.Request) (*url.URL, error) {
 	}
 }
 
-// NewHttpClient creates a new HTTP client.
+// NewHttpClient creates a new HTTP client with default transport configuration.
 func NewHttpClient() *HttpClient {
+	transport := &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		DialContext: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}).DialContext,
+		ForceAttemptHTTP2:     true,
+		MaxIdleConns:          100,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+	}
+
 	return &HttpClient{
-		client: &http.Client{},
+		client: &http.Client{
+			Transport: transport,
+		},
 	}
 }
 

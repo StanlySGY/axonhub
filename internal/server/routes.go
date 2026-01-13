@@ -85,6 +85,9 @@ func SetupRoutes(server *Server, handlers Handlers, client *ent.Client, services
 			handlers.Graphql.Playground.ServeHTTP(c.Writer, c.Request)
 		})
 		adminGroup.POST("/graphql", middleware.WithTimeout(server.Config.RequestTimeout), func(c *gin.Context) {
+			// Inject dataloaders into context for each request
+			ctx := gql.WithLoaders(c.Request.Context(), handlers.Graphql.Loaders)
+			c.Request = c.Request.WithContext(ctx)
 			handlers.Graphql.Graphql.ServeHTTP(c.Writer, c.Request)
 		})
 

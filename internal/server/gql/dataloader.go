@@ -1,0 +1,102 @@
+package gql
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/graph-gophers/dataloader/v7"
+	"github.com/samber/lo"
+
+	"github.com/looplj/axonhub/internal/ent"
+	"github.com/looplj/axonhub/internal/ent/channel"
+)
+
+// Loaders holds all dataloaders for the GraphQL server.
+type Loaders struct {
+	ChannelLoader *dataloader.Loader[int, *ent.Channel]
+}
+
+// loaderKey is the context key for dataloaders.
+type loaderKey struct{}
+
+// NewLoaders creates a new Loaders instance with all dataloaders configured.
+func NewLoaders(client *ent.Client) *Loaders {
+	return &Loaders{
+		ChannelLoader: dataloader.NewBatchedLoader(
+			newChannelBatchFunc(client),
+			dataloader.WithCache[int, *ent.Channel](&dataloader.NoCache[int, *ent.Channel]{}),
+		),
+	}
+}
+
+// WithLoaders adds dataloaders to the context.
+func WithLoaders(ctx context.Context, loaders *Loaders) context.Context {
+	return context.WithValue(ctx, loaderKey{}, loaders)
+}
+
+// GetLoaders retrieves dataloaders from the context.
+func GetLoaders(ctx context.Context) *Loaders {
+	loaders, ok := ctx.Value(loaderKey{}).(*Loaders)
+	if !ok {
+		return nil
+	}
+	return loaders
+}
+
+// newChannelBatchFunc creates a batch function for loading channels by ID.
+func newChannelBatchFunc(client *ent.Client) dataloader.BatchFunc[int, *ent.Channel] {
+	return func(ctx context.Context, keys []int) []*dataloader.Result[*ent.Channel] {
+		// Filter out zero IDs
+		validKeys := lo.Filter(keys, func(id int, _ int) bool { return id != 0 })
+
+		// Query all channels in one batch
+		channels, err := client.Channel.Query().
+			Where(channel.IDIn(validKeys...)).
+			All(ctx)
+
+		// Build a map for quick lookup
+		channelMap := make(map[int]*ent.Channel, len(channels))
+		for _, ch := range channels {
+			channelMap[ch.ID] = ch
+		}
+
+		// Build results in the same order as keys
+		results := make([]*dataloader.Result[*ent.Channel], len(keys))
+		for i, key := range keys {
+			if key == 0 {
+				results[i] = &dataloader.Result[*ent.Channel]{Data: nil, Error: nil}
+				continue
+			}
+
+			if err != nil {
+				results[i] = &dataloader.Result[*ent.Channel]{
+					Error: fmt.Errorf("failed to load channel %d: %w", key, err),
+				}
+				continue
+			}
+
+			ch, ok := channelMap[key]
+			if !ok {
+				// Channel not found - return nil without error (soft delete or doesn't exist)
+				results[i] = &dataloader.Result[*ent.Channel]{Data: nil, Error: nil}
+				continue
+			}
+
+			results[i] = &dataloader.Result[*ent.Channel]{Data: ch}
+		}
+
+		return results
+	}
+}
+
+// LoadChannel loads a channel by ID using the dataloader.
+// Returns nil if the channel doesn't exist or ID is 0.
+func LoadChannel(ctx context.Context, channelID int) (*ent.Channel, error) {
+	loaders := GetLoaders(ctx)
+	if loaders == nil {
+		return nil, fmt.Errorf("dataloaders not found in context")
+	}
+
+	thunk := loaders.ChannelLoader.Load(ctx, channelID)
+	return thunk()
+}

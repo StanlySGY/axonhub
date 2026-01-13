@@ -29,7 +29,7 @@ type GraphqlHandler struct {
 func NewGraphqlHandlers(schema graphql.ExecutableSchema) *GraphqlHandler {
 	return &GraphqlHandler{
 		Graphql:    NewGraphHandler(schema),
-		Playground: playground.Handler("AxonHub", "/graphql"),
+		Playground: playground.Handler("AxonHub", "/admin/graphql"),
 	}
 }
 

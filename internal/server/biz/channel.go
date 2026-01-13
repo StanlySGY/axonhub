@@ -58,6 +58,7 @@ type ChannelServiceParams struct {
 	Executor      executors.ScheduledExecutor
 	Ent           *ent.Client
 	SystemService *SystemService
+	HttpClient    *httpclient.HttpClient
 }
 
 func NewChannelService(params ChannelServiceParams) *ChannelService {
@@ -69,6 +70,7 @@ func NewChannelService(params ChannelServiceParams) *ChannelService {
 			executors.WithMaxConcurrent(1),
 		),
 		SystemService:      params.SystemService,
+		httpClient:         params.HttpClient,
 		channelPerfMetrics: make(map[int]*channelMetrics),
 		channelErrorCounts: make(map[int]map[int]int),
 		perfCh:             make(chan *PerformanceRecord, 1024),
@@ -108,6 +110,9 @@ type ChannelService struct {
 
 	Executors     executors.ScheduledExecutor
 	SystemService *SystemService
+
+	// httpClient is the shared HTTP client for model fetching
+	httpClient *httpclient.HttpClient
 
 	enabledChannels []*Channel
 	// latestUpdate 记录最新的 channel 更新时间，用于优化定时加载
