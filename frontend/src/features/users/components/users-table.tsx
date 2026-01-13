@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -63,12 +63,27 @@ export function UsersTable({
 }: DataTableProps) {
   const { t } = useTranslation();
   const [rowSelection, setRowSelection] = useState({});
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(() => {
+    const stored = localStorage.getItem('users-table-column-visibility');
+    if (stored) {
+      try {
+        return JSON.parse(stored);
+      } catch {
+        return {};
+      }
+    }
+    return {};
+  });
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
 
+  // Save column visibility to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('users-table-column-visibility', JSON.stringify(columnVisibility));
+  }, [columnVisibility]);
+
   // Sync server state to local column filters (for UI display)
-  React.useEffect(() => {
+  useEffect(() => {
     const newFilters: ColumnFiltersState = [];
     if (nameFilter) {
       newFilters.push({ id: 'firstName', value: nameFilter });
