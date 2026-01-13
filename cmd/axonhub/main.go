@@ -59,7 +59,7 @@ func startServer() {
 		}),
 		fx.Provide(conf.Load),
 		fx.Provide(metrics.NewProvider),
-		fx.Invoke(func(lc fx.Lifecycle, server *server.Server, provider *sdk.MeterProvider, ent *ent.Client) {
+		fx.Invoke(func(lc fx.Lifecycle, server *server.Server, provider *sdk.MeterProvider, ent *ent.Client, shutdowner fx.Shutdowner) {
 			lc.Append(fx.Hook{
 				OnStart: func(ctx context.Context) error {
 					if provider != nil {
@@ -82,7 +82,11 @@ func startServer() {
 						err := server.Run()
 						if err != nil {
 							log.Error(context.Background(), "server run error:", log.Cause(err))
-							os.Exit(1)
+							// Use fx.Shutdowner for graceful shutdown instead of os.Exit
+							// This ensures OnStop hooks are called properly
+							if shutdownErr := shutdowner.Shutdown(fx.ExitCode(1)); shutdownErr != nil {
+								log.Error(context.Background(), "shutdowner error:", log.Cause(shutdownErr))
+							}
 						}
 					}()
 

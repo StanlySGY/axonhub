@@ -143,6 +143,11 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("db.dialect", "sqlite3")
 	v.SetDefault("db.dsn", "file:axonhub.db?cache=shared&_fk=1&journal_mode=WAL")
 	v.SetDefault("db.debug", false)
+	v.SetDefault("db.auto_migrate", true)
+	v.SetDefault("db.drop_index", false)  // Disabled by default for safety
+	v.SetDefault("db.drop_column", false) // Disabled by default for safety
+	v.SetDefault("db.max_open_conns", 0)  // 0 means use default (SQLite will use 1)
+	v.SetDefault("db.max_idle_conns", 0)  // 0 means use default
 
 	// Log defaults
 	v.SetDefault("log.name", "axonhub")
