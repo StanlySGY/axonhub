@@ -1,6 +1,5 @@
 import { Link } from '@tanstack/react-router';
 import { IconSettings } from '@tabler/icons-react';
-import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { LanguageSwitch } from '@/components/language-switch';
@@ -8,11 +7,11 @@ import { PermissionGuard } from '@/components/permission-guard';
 import { ProfileDropdown } from '@/components/profile-dropdown';
 import { ThemeSwitch } from '@/components/theme-switch';
 import { useBrandSettings } from '@/features/system/data/system';
+import { DynamicBreadcrumb } from './dynamic-breadcrumb';
 import { ProjectSwitcher } from './project-switcher';
 
 export function AppHeader() {
   const { data: brandSettings } = useBrandSettings();
-  const { t } = useTranslation();
   const displayName = brandSettings?.brandName || 'AxonHub';
 
   return (
@@ -49,6 +48,14 @@ export function AppHeader() {
 
           {/* Project Switcher */}
           <ProjectSwitcher />
+
+          {/* Separator */}
+          <div className='bg-border mx-0.5 h-3.5 w-px hidden md:block' />
+
+          {/* Breadcrumb Navigation - Hidden on mobile */}
+          <div className='hidden md:block'>
+            <DynamicBreadcrumb />
+          </div>
         </div>
 
         {/* 右侧控件 */}

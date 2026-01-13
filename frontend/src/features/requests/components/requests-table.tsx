@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   ColumnFiltersState,
   RowData,
@@ -12,10 +12,9 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { DateRange } from 'react-day-picker';
 import { useTranslation } from 'react-i18next';
-import { useAnimatedList } from '@/hooks/useAnimatedList';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { TableSkeleton } from '@/components/ui/table-skeleton';
 import { ServerSidePagination } from '@/components/server-side-pagination';
@@ -23,8 +22,6 @@ import { arraysEqual } from '@/utils/array-utils';
 import { Request, RequestConnection } from '../data/schema';
 import { DataTableToolbar } from './data-table-toolbar';
 import { useRequestsColumns } from './requests-columns';
-
-const MotionTableRow = motion(TableRow);
 
 declare module '@tanstack/react-table' {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -105,8 +102,6 @@ export function RequestsTable({
     localStorage.setItem('requests-table-column-visibility', JSON.stringify(columnVisibility));
   }, [columnVisibility]);
 
-  const displayedData = useAnimatedList(data, autoRefresh);
-
   // Sync filters with the server state
   const handleColumnFiltersChange = (updater: any) => {
     const newFilters = typeof updater === 'function' ? updater(columnFilters) : updater;
@@ -154,7 +149,7 @@ export function RequestsTable({
   }
 
   const table = useReactTable({
-    data: displayedData,
+    data,
     getRowId: (row) => row.id,
     columns: requestsColumns,
     state: {
@@ -182,6 +177,24 @@ export function RequestsTable({
     manualFiltering: true, // Enable manual filtering for server-side filtering
   });
 
+  // Virtualization setup
+  const parentRef = useRef<HTMLDivElement>(null);
+  const { rows } = table.getRowModel();
+
+  const virtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 56, // Estimated row height
+    overscan: 5,
+  });
+
+  const virtualRows = virtualizer.getVirtualItems();
+  const totalSize = virtualizer.getTotalSize();
+
+  // Padding for virtual scroll (table-safe method)
+  const paddingTop = virtualRows.length > 0 ? virtualRows[0].start : 0;
+  const paddingBottom = virtualRows.length > 0 ? totalSize - virtualRows[virtualRows.length - 1].end : 0;
+
   return (
     <div className='flex flex-1 flex-col overflow-hidden'>
       <DataTableToolbar
@@ -195,7 +208,7 @@ export function RequestsTable({
         autoRefresh={autoRefresh}
         onAutoRefreshChange={onAutoRefreshChange}
       />
-      <div className='shadow-soft relative mt-4 flex-1 overflow-auto rounded-2xl border border-[var(--table-border)]'>
+      <div ref={parentRef} className='shadow-soft relative mt-4 flex-1 overflow-auto rounded-2xl border border-[var(--table-border)]'>
         <div className='min-w-max'>
           <Table data-testid='requests-table' className='border-separate border-spacing-0 rounded-2xl bg-[var(--table-background)]'>
           <TableHeader className='sticky top-0 z-20 bg-[var(--table-header)] shadow-sm'>
@@ -218,36 +231,35 @@ export function RequestsTable({
           <TableBody className='space-y-1 !bg-[var(--table-background)] p-2'>
             {loading ? (
               <TableSkeleton rows={pageSize} columns={requestsColumns.length} />
-            ) : table.getRowModel().rows?.length ? (
-              <AnimatePresence initial={false} mode='popLayout'>
-                {table.getRowModel().rows.map((row) => (
-                  <MotionTableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && 'selected'}
-                    initial={{ opacity: 0, y: -20, height: 0 }}
-                    animate={{ opacity: 1, y: 0, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{
-                      type: 'spring',
-                      stiffness: 500,
-                      damping: 30,
-                      mass: 1,
-                      opacity: { duration: 0.2 },
-                    }}
-                    layout
-                    className='group/row hover:bg-muted/50 data-[state=selected]:bg-muted'
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell
-                        key={cell.id}
-                        className={`${cell.column.columnDef.meta?.className ?? ''} border-b border-[var(--table-border)] py-3 group-last/row:border-0`}
-                      >
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
-                    ))}
-                  </MotionTableRow>
-                ))}
-              </AnimatePresence>
+            ) : rows.length ? (
+              <>
+                {paddingTop > 0 && (
+                  <tr style={{ height: paddingTop }} />
+                )}
+                {virtualRows.map((virtualRow) => {
+                  const row = rows[virtualRow.index];
+                  return (
+                    <TableRow
+                      key={row.id}
+                      data-index={virtualRow.index}
+                      data-state={row.getIsSelected() && 'selected'}
+                      className='group/row table-row-hover rounded-xl border-0 !bg-[var(--table-background)] transition-all duration-200 ease-in-out hover:bg-muted/50 data-[state=selected]:bg-muted'
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell
+                          key={cell.id}
+                          className={`${cell.column.columnDef.meta?.className ?? ''} border-b border-[var(--table-border)] py-3 group-last/row:border-0`}
+                        >
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  );
+                })}
+                {paddingBottom > 0 && (
+                  <tr style={{ height: paddingBottom }} />
+                )}
+              </>
             ) : (
               <TableRow className='!bg-[var(--table-background)]'>
                 <TableCell colSpan={requestsColumns.length} className='h-24 !bg-[var(--table-background)] text-center'>
