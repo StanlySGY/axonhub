@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { TableSkeleton } from '@/components/ui/table-skeleton';
 import { ServerSidePagination } from '@/components/server-side-pagination';
+import { arraysEqual } from '@/utils/array-utils';
 import { User, UserConnection } from '../data/schema';
 import { DataTableToolbar } from './data-table-toolbar';
 
@@ -97,12 +98,12 @@ export function UsersTable({
     }
 
     const newStatusFilter = Array.isArray(statusFilterValue) ? statusFilterValue : [];
-    if (JSON.stringify(newStatusFilter.sort()) !== JSON.stringify(statusFilter.sort())) {
+    if (!arraysEqual(newStatusFilter, statusFilter)) {
       onStatusFilterChange(newStatusFilter);
     }
 
     const newRoleFilter = Array.isArray(roleFilterValue) ? roleFilterValue : [];
-    if (JSON.stringify(newRoleFilter.sort()) !== JSON.stringify(roleFilter.sort())) {
+    if (!arraysEqual(newRoleFilter, roleFilter)) {
       onRoleFilterChange(newRoleFilter);
     }
   };

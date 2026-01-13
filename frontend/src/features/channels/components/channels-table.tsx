@@ -22,6 +22,7 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { TableSkeleton } from '@/components/ui/table-skeleton';
 import { ServerSidePagination } from '@/components/server-side-pagination';
+import { arraysEqual } from '@/utils/array-utils';
 import { ChannelExpandedRow } from './channel-expanded-row';
 import { useChannels } from '../context/channels-context';
 import { Channel, ChannelConnection } from '../data/schema';
@@ -175,11 +176,11 @@ export function ChannelsTable({
         onNameFilterChange(newNameFilter);
       }
 
-      if (JSON.stringify(newTypeFilter.sort()) !== JSON.stringify(typeFilter.sort())) {
+      if (!arraysEqual(newTypeFilter, typeFilter)) {
         onTypeFilterChange(newTypeFilter);
       }
 
-      if (JSON.stringify(newStatusFilter.sort()) !== JSON.stringify(statusFilter.sort())) {
+      if (!arraysEqual(newStatusFilter, statusFilter)) {
         onStatusFilterChange(newStatusFilter);
       }
 

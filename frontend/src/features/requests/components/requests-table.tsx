@@ -19,6 +19,7 @@ import { useAnimatedList } from '@/hooks/useAnimatedList';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { TableSkeleton } from '@/components/ui/table-skeleton';
 import { ServerSidePagination } from '@/components/server-side-pagination';
+import { arraysEqual } from '@/utils/array-utils';
 import { Request, RequestConnection } from '../data/schema';
 import { DataTableToolbar } from './data-table-toolbar';
 import { useRequestsColumns } from './requests-columns';
@@ -117,22 +118,22 @@ export function RequestsTable({
     const apiKeyFilterValue = newFilters.find((filter: any) => filter.id === 'apiKey')?.value;
 
     const statusFilterArray = Array.isArray(statusFilterValue) ? statusFilterValue : [];
-    if (JSON.stringify(statusFilterArray.sort()) !== JSON.stringify(statusFilter.sort())) {
+    if (!arraysEqual(statusFilterArray, statusFilter)) {
       onStatusFilterChange(statusFilterArray);
     }
 
     const sourceFilterArray = Array.isArray(sourceFilterValue) ? sourceFilterValue : [];
-    if (JSON.stringify(sourceFilterArray.sort()) !== JSON.stringify(sourceFilter.sort())) {
+    if (!arraysEqual(sourceFilterArray, sourceFilter)) {
       onSourceFilterChange(sourceFilterArray);
     }
 
     const channelFilterArray = Array.isArray(channelFilterValue) ? channelFilterValue : [];
-    if (JSON.stringify(channelFilterArray.sort()) !== JSON.stringify(channelFilter.sort())) {
+    if (!arraysEqual(channelFilterArray, channelFilter)) {
       onChannelFilterChange(channelFilterArray);
     }
 
     const apiKeyFilterArray = Array.isArray(apiKeyFilterValue) ? apiKeyFilterValue : [];
-    if (JSON.stringify(apiKeyFilterArray.sort()) !== JSON.stringify(apiKeyFilter.sort())) {
+    if (!arraysEqual(apiKeyFilterArray, apiKeyFilter)) {
       onApiKeyFilterChange(apiKeyFilterArray);
     }
   };

@@ -5,6 +5,7 @@ import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/authStore';
 import { handleServerError } from '@/utils/handle-server-error';
+import { ErrorBoundary } from '@/components/error-boundary';
 import { FontProvider } from './context/font-context';
 import { SearchProvider } from './context/search-context';
 import { ThemeProvider } from './context/theme-context';
@@ -92,15 +93,17 @@ if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement);
   root.render(
     <StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider defaultTheme='system' defaultColorScheme='claude'>
-          <FontProvider>
-            <SearchProvider>
-              <RouterProvider router={router} />
-            </SearchProvider>
-          </FontProvider>
-        </ThemeProvider>
-      </QueryClientProvider>
+      <ErrorBoundary>
+        <QueryClientProvider client={queryClient}>
+          <ThemeProvider defaultTheme='system' defaultColorScheme='claude'>
+            <FontProvider>
+              <SearchProvider>
+                <RouterProvider router={router} />
+              </SearchProvider>
+            </FontProvider>
+          </ThemeProvider>
+        </QueryClientProvider>
+      </ErrorBoundary>
     </StrictMode>
   );
 }
