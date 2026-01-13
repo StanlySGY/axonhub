@@ -52,6 +52,7 @@ interface DataTableProps {
   selectedTypeTab?: string;
   showErrorOnly?: boolean;
   onExitErrorOnlyMode?: () => void;
+  onClearAllFilters?: () => void;
   sorting: SortingState;
   onSortingChange: (updater: SortingState | ((prev: SortingState) => SortingState)) => void;
   onNextPage: () => void;
@@ -84,6 +85,7 @@ export function ChannelsTable({
   sorting,
   onSortingChange,
   onExitErrorOnlyMode,
+  onClearAllFilters,
   onNextPage,
   onPreviousPage,
   onPageSizeChange,
@@ -307,6 +309,7 @@ export function ChannelsTable({
         selectedTypeTab={selectedTypeTab}
         showErrorOnly={showErrorOnly}
         onExitErrorOnlyMode={onExitErrorOnlyMode}
+        onClearAllFilters={onClearAllFilters}
       />
       <div ref={parentRef} className='shadow-soft relative mt-4 flex-1 overflow-auto rounded-2xl border border-[var(--table-border)]'>
         <div className='min-w-max'>

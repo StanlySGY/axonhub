@@ -17,6 +17,7 @@ interface DataTableToolbarProps<TData> {
   selectedTypeTab?: string;
   showErrorOnly?: boolean;
   onExitErrorOnlyMode?: () => void;
+  onClearAllFilters?: () => void;
 }
 
 export function DataTableToolbar<TData>({
@@ -26,10 +27,12 @@ export function DataTableToolbar<TData>({
   selectedTypeTab = 'all',
   showErrorOnly,
   onExitErrorOnlyMode,
+  onClearAllFilters,
 }: DataTableToolbarProps<TData>) {
   const { t } = useTranslation();
   const tableState = table.getState();
   const isFiltered = externalIsFiltered ?? tableState.columnFilters.length > 0;
+  const hasAnyFilter = isFiltered || selectedTypeTab !== 'all' || showErrorOnly;
 
   // Get all channel tags from GraphQL
   const { data: allTags = [] } = useAllChannelTags();
@@ -111,10 +114,16 @@ export function DataTableToolbar<TData>({
       {table.getColumn('model') && modelOptions?.length > 0 && (
         <DataTableFacetedFilter column={table.getColumn('model')} title={t('channels.filters.model')} options={modelOptions} singleSelect />
       )}
-      {isFiltered && (
+      {hasAnyFilter && (
         <Button
           variant='ghost'
-          onClick={() => table.resetColumnFilters()}
+          onClick={() => {
+            if (onClearAllFilters) {
+              onClearAllFilters();
+            } else {
+              table.resetColumnFilters();
+            }
+          }}
           className='h-8 px-2 lg:px-3'
         >
           {t('common.filters.reset')}

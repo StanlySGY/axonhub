@@ -234,6 +234,17 @@ function ChannelsContent() {
     resetCursor();
   }, [resetCursor]);
 
+  const handleClearAllFilters = useCallback(() => {
+    setNameFilter('');
+    setTypeFilter([]);
+    setStatusFilter([]);
+    setTagFilter('');
+    setModelFilter('');
+    setSelectedTypeTab('all');
+    setShowErrorOnly(false);
+    resetCursor();
+  }, [resetCursor]);
+
   const columns = useMemo(() => createColumns(t, channelPermissions.canWrite), [t, channelPermissions.canWrite]);
 
   return (
@@ -262,6 +273,7 @@ function ChannelsContent() {
         sorting={sorting}
         onSortingChange={setSorting}
         onExitErrorOnlyMode={handleExitErrorOnlyMode}
+        onClearAllFilters={handleClearAllFilters}
         onNextPage={handleNextPage}
         onPreviousPage={handlePreviousPage}
         onPageSizeChange={handlePageSizeChange}
