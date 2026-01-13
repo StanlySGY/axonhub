@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { IconTrash, IconRefresh } from '@tabler/icons-react';
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
-import { MessageSquare, RefreshCcw, Copy } from 'lucide-react';
+import { MessageSquare, RefreshCcw, Copy, Menu } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/authStore';
@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Actions, Action } from '@/components/ai-elements/actions';
 import { Conversation, ConversationContent, ConversationEmptyState, ConversationScrollButton } from '@/components/ai-elements/conversation';
 import { Loader } from '@/components/ai-elements/loader';
@@ -21,68 +22,50 @@ import { PromptInput, PromptInputTextarea, PromptInputSubmit } from '@/component
 import { Reasoning, ReasoningTrigger, ReasoningContent } from '@/components/ai-elements/reasoning';
 import { Response as UIResponse } from '@/components/ai-elements/response';
 import { AutoCompleteSelect } from '@/components/auto-complete-select';
-import { useChannelModels } from '@/hooks/use-channel-models';
+import { usePlaygroundSettings } from './hooks/usePlaygroundSettings';
 
 export default function Playground() {
   const { t } = useTranslation();
-  const [selectedGroupModel, setSelectedGroupModel] = useState('');
-  const [model, setModel] = useState('gpt-4o');
-  const [selectedChannel, setSelectedChannel] = useState<string | null>(null);
-  const [temperature, setTemperature] = useState(0.6);
-  const [maxTokens, setMaxTokens] = useState(4096);
-  const [systemPrompt, setSystemPrompt] = useState(t('playground.settings.defaultSystemPrompt'));
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [input, setInput] = useState('');
 
-  // useRef hooks for direct access to current values
-  const modelRef = useRef(model);
-  const temperatureRef = useRef(temperature);
-  const maxTokensRef = useRef(maxTokens);
-  const systemPromptRef = useRef(systemPrompt);
-  const selectedChannelRef = useRef(selectedChannel);
-
-  // Keep refs synchronized with state
-  useEffect(() => {
-    modelRef.current = model;
-  }, [model]);
-
-  useEffect(() => {
-    temperatureRef.current = temperature;
-  }, [temperature]);
-
-  useEffect(() => {
-    maxTokensRef.current = maxTokens;
-  }, [maxTokens]);
-
-  useEffect(() => {
-    systemPromptRef.current = systemPrompt;
-  }, [systemPrompt]);
-
-  useEffect(() => {
-    selectedChannelRef.current = selectedChannel;
-  }, [selectedChannel]);
+  const {
+    selectedGroupModel,
+    temperature,
+    maxTokens,
+    systemPrompt,
+    setTemperature,
+    setMaxTokens,
+    setSystemPrompt,
+    handleModelChange,
+    modelOptions,
+    channelsLoading,
+    channelCount,
+    getSettings,
+  } = usePlaygroundSettings();
 
   const { accessToken } = useAuthStore((state) => state.auth);
   const selectedProjectId = useSelectedProjectId();
-  const { modelOptions, isLoading: channelsLoading, channelCount } = useChannelModels();
-
-  const [input, setInput] = useState('');
 
   const { messages, sendMessage, status, setMessages, regenerate, stop } = useChat({
     transport: new DefaultChatTransport({
       api: '/admin/playground/chat',
       credentials: 'include',
       headers: () => {
+        const settings = getSettings();
         return {
           Authorization: 'Bearer ' + accessToken,
-          'X-Channel-ID': selectedChannelRef.current || '',
+          'X-Channel-ID': settings.selectedChannel || '',
           'X-Project-ID': selectedProjectId || '',
         };
       },
       body: () => {
+        const settings = getSettings();
         return {
-          model: modelRef.current,
-          temperature: temperatureRef.current,
-          max_tokens: maxTokensRef.current,
-          system: systemPromptRef.current,
+          model: settings.model,
+          temperature: settings.temperature,
+          max_tokens: settings.maxTokens,
+          system: settings.systemPrompt,
         };
       },
       fetch: async (url, init) => {
@@ -161,7 +144,7 @@ export default function Playground() {
         setInput('');
       }
     },
-    [sendMessage, selectedChannel, isLoading]
+    [sendMessage, isLoading]
   );
 
   const handleClear = useCallback(() => {
@@ -195,150 +178,142 @@ export default function Playground() {
     }
   }, [messages, regenerate, setMessages]);
 
-  // 处理模型选择，同时设置对应的 channel
-  const handleModelChange = useCallback(
-    (newModel: string) => {
-      setSelectedGroupModel(newModel);
-      const parts = newModel.split('|');
-      setModel(parts[1]);
-      setSelectedChannel(parts[0]);
-    },
-    [setSelectedGroupModel, setModel, setSelectedChannel]
-  );
+  const sidebarContent = (
+    <>
+      <ScrollArea className='flex-1 p-4'>
+        <div className='space-y-6'>
+          <div className='space-y-3'>
+            <Label htmlFor='model' className='text-xs font-semibold'>
+              {t('playground.settings.model')}
+            </Label>
+            <AutoCompleteSelect
+              selectedValue={selectedGroupModel as string}
+              onSelectedValueChange={(v) => handleModelChange(v)}
+              items={modelOptions}
+              isLoading={channelsLoading}
+              emptyMessage={t('playground.errors.noChannelsAvailable')}
+              placeholder={channelsLoading ? t('loading') : t('playground.settings.selectModel')}
+            />
+            {channelsLoading && <p className='text-muted-foreground text-[10px]'>{t('loading')}...</p>}
+            {!channelsLoading && modelOptions.length > 0 && (
+              <p className='text-muted-foreground text-[10px]'>
+                {t('playground.modelsAvailable', {
+                  count: modelOptions.length,
+                  channels: channelCount,
+                })}
+              </p>
+            )}
+          </div>
 
-  useEffect(() => {
-    if (!selectedGroupModel && modelOptions.length > 0) {
-      handleModelChange(modelOptions[0].value);
-    }
-  }, [modelOptions, handleModelChange, selectedGroupModel]);
+          <div className='space-y-3'>
+            <Label htmlFor='temperature' className='text-xs font-semibold'>
+              {t('playground.settings.temperature')}: {temperature}
+            </Label>
+            <div className='px-1'>
+              <Input
+                id='temperature'
+                type='range'
+                min='0'
+                max='2'
+                step='0.1'
+                value={temperature}
+                onChange={(e) => setTemperature(parseFloat(e.target.value))}
+                className='bg-muted h-2 w-full cursor-pointer appearance-none rounded-lg'
+              />
+              <div className='text-muted-foreground mt-1 flex justify-between text-[10px]'>
+                <span>0</span>
+                <span>1</span>
+                <span>2</span>
+              </div>
+            </div>
+          </div>
+
+          <div className='space-y-3'>
+            <Label htmlFor='maxTokens' className='text-xs font-semibold'>
+              {t('playground.settings.maxTokens')}
+            </Label>
+            <Input
+              id='maxTokens'
+              type='number'
+              min='1'
+              max='4000'
+              value={maxTokens}
+              onChange={(e) => setMaxTokens(parseInt(e.target.value))}
+              className='h-9'
+            />
+          </div>
+
+          <div className='space-y-3'>
+            <Label htmlFor='systemPrompt' className='text-xs font-semibold'>
+              {t('playground.settings.systemPrompt')}
+            </Label>
+            <Textarea
+              id='systemPrompt'
+              placeholder={t('playground.settings.defaultSystemPrompt')}
+              value={systemPrompt}
+              onChange={(e) => setSystemPrompt(e.target.value)}
+              rows={4}
+              className='min-h-[80px] resize-none text-sm'
+            />
+          </div>
+        </div>
+      </ScrollArea>
+
+      <div className='space-y-2 border-t p-4'>
+        <Button
+          onClick={handleRetry}
+          variant='outline'
+          className='h-9 w-full text-xs'
+          disabled={isLoading || messages.length === 0 || messages.every((msg) => msg.role !== 'assistant')}
+        >
+          <IconRefresh className='mr-2 h-3 w-3' />
+          {isLoading
+            ? t('playground.chat.generating')
+            : messages.length === 0
+              ? t('playground.chat.noMessages')
+              : messages.every((msg) => msg.role !== 'assistant')
+                ? t('playground.chat.noMessages')
+                : t('playground.chat.retry')}
+        </Button>
+
+        <Button onClick={handleClear} variant='outline' className='h-9 w-full text-xs' disabled={isLoading}>
+          <IconTrash className='mr-2 h-3 w-3' />
+          {t('playground.chat.clear')}
+        </Button>
+      </div>
+    </>
+  );
 
   return (
     <TooltipProvider>
-      {/* {process.env.NODE_ENV === 'development' && (
-        <AIDevtools
-          config={{
-            enabled: true,
-            position: 'bottom',
-            theme: 'dark',
-            streamCapture: {
-              enabled: true,
-              endpoint: '/admin/playground/chat',
-              autoConnect: true,
-            },
-          }}
-          enabled={true}
-        />
-      )} */}
       <div className='bg-background flex h-screen w-full'>
-        {/* Settings Sidebar */}
+        {/* Mobile Menu Button */}
+        <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+          <SheetTrigger asChild>
+            <Button
+              variant='outline'
+              size='icon'
+              className='fixed left-4 top-4 z-50 md:hidden'
+            >
+              <Menu className='h-4 w-4' />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side='left' className='w-[340px] p-0'>
+            <SheetHeader className='border-b p-4'>
+              <SheetTitle>{t('playground.title')}</SheetTitle>
+              <p className='text-muted-foreground text-xs'>{t('playground.description')}</p>
+            </SheetHeader>
+            {sidebarContent}
+          </SheetContent>
+        </Sheet>
 
-        <div className='bg-card shadow-soft border-border m-4 flex w-[340px] max-w-[400px] min-w-[280px] flex-col rounded-2xl border border-r'>
+        {/* Desktop Sidebar */}
+        <div className='bg-card shadow-soft border-border m-4 hidden w-[340px] max-w-[400px] min-w-[280px] flex-col rounded-2xl border border-r md:flex'>
           <div className='border-b p-4'>
             <h1 className='text-xl font-bold tracking-tight'>{t('playground.title')}</h1>
             <p className='text-muted-foreground mt-1 text-xs leading-relaxed'>{t('playground.description')}</p>
           </div>
-
-          <ScrollArea className='flex-1 p-4'>
-            <div className='space-y-6'>
-              <div className='space-y-3'>
-                <Label htmlFor='model' className='text-xs font-semibold'>
-                  {t('playground.settings.model')}
-                </Label>
-                <AutoCompleteSelect
-                  selectedValue={selectedGroupModel as string}
-                  onSelectedValueChange={(v) => handleModelChange(v)}
-                  items={modelOptions}
-                  isLoading={channelsLoading}
-                  emptyMessage={t('playground.errors.noChannelsAvailable')}
-                  placeholder={channelsLoading ? t('loading') : t('playground.settings.selectModel')}
-                />
-                {channelsLoading && <p className='text-muted-foreground text-[10px]'>{t('loading')}...</p>}
-                {!channelsLoading && modelOptions.length > 0 && (
-                  <p className='text-muted-foreground text-[10px]'>
-                    {t('playground.modelsAvailable', {
-                      count: modelOptions.length,
-                      channels: channelCount,
-                    })}
-                  </p>
-                )}
-              </div>
-
-              <div className='space-y-3'>
-                <Label htmlFor='temperature' className='text-xs font-semibold'>
-                  {t('playground.settings.temperature')}: {temperature}
-                </Label>
-                <div className='px-1'>
-                  <Input
-                    id='temperature'
-                    type='range'
-                    min='0'
-                    max='2'
-                    step='0.1'
-                    value={temperature}
-                    onChange={(e) => setTemperature(parseFloat(e.target.value))}
-                    className='bg-muted h-2 w-full cursor-pointer appearance-none rounded-lg'
-                  />
-                  <div className='text-muted-foreground mt-1 flex justify-between text-[10px]'>
-                    <span>0</span>
-                    <span>1</span>
-                    <span>2</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className='space-y-3'>
-                <Label htmlFor='maxTokens' className='text-xs font-semibold'>
-                  {t('playground.settings.maxTokens')}
-                </Label>
-                <Input
-                  id='maxTokens'
-                  type='number'
-                  min='1'
-                  max='4000'
-                  value={maxTokens}
-                  onChange={(e) => setMaxTokens(parseInt(e.target.value))}
-                  className='h-9'
-                />
-              </div>
-
-              <div className='space-y-3'>
-                <Label htmlFor='systemPrompt' className='text-xs font-semibold'>
-                  {t('playground.settings.systemPrompt')}
-                </Label>
-                <Textarea
-                  id='systemPrompt'
-                  placeholder={t('playground.settings.defaultSystemPrompt')}
-                  value={systemPrompt}
-                  onChange={(e) => setSystemPrompt(e.target.value)}
-                  rows={4}
-                  className='min-h-[80px] resize-none text-sm'
-                />
-              </div>
-            </div>
-          </ScrollArea>
-
-          <div className='space-y-2 border-t p-4'>
-            <Button
-              onClick={handleRetry}
-              variant='outline'
-              className='h-9 w-full text-xs'
-              disabled={isLoading || messages.length === 0 || messages.every((msg) => msg.role !== 'assistant')}
-            >
-              <IconRefresh className='mr-2 h-3 w-3' />
-              {isLoading
-                ? t('playground.chat.generating')
-                : messages.length === 0
-                  ? t('playground.chat.noMessages')
-                  : messages.every((msg) => msg.role !== 'assistant')
-                    ? t('playground.chat.noMessages')
-                    : t('playground.chat.retry')}
-            </Button>
-
-            <Button onClick={handleClear} variant='outline' className='h-9 w-full text-xs' disabled={isLoading}>
-              <IconTrash className='mr-2 h-3 w-3' />
-              {t('playground.chat.clear')}
-            </Button>
-          </div>
+          {sidebarContent}
         </div>
 
         {/* Chat Area */}
