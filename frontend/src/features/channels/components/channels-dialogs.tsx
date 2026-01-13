@@ -1,15 +1,10 @@
 import { useChannels } from '../context/channels-context';
 import { ChannelsActionDialog } from './channels-action-dialog';
-import { ChannelsArchiveDialog } from './channels-archive-dialog';
 import { ChannelsBulkApplyTemplateDialog } from './channels-bulk-apply-template-dialog';
-import { ChannelsBulkArchiveDialog } from './channels-bulk-archive-dialog';
-import { ChannelsBulkDeleteDialog } from './channels-bulk-delete-dialog';
-import { ChannelsBulkDisableDialog } from './channels-bulk-disable-dialog';
-import { ChannelsBulkEnableDialog } from './channels-bulk-enable-dialog';
 import { ChannelsBulkImportDialog } from './channels-bulk-import-dialog';
 import { ChannelsBulkOrderingDialog } from './channels-bulk-ordering-dialog';
-import { ChannelsDeleteDialog } from './channels-delete-dialog';
 import { ChannelsErrorResolvedDialog } from './channels-error-resolved-dialog';
+import { ChannelsGenericConfirmDialog } from './channels-generic-confirm-dialog';
 import { ChannelsModelMappingDialog } from './channels-model-mapping-dialog';
 import { ChannelsOverrideDialog } from './channels-override-dialog';
 import { ChannelsProxyDialog } from './channels-proxy-dialog';
@@ -27,13 +22,8 @@ export function ChannelsDialogs() {
 
       <ChannelsActionDialog key='channel-add' open={open === 'add'} onOpenChange={(isOpen) => setOpen(isOpen ? 'add' : null)} />
 
-      <ChannelsBulkArchiveDialog />
-
-      <ChannelsBulkDisableDialog />
-
-      <ChannelsBulkEnableDialog />
-
-      <ChannelsBulkDeleteDialog />
+      {/* Generic confirm dialogs for simple operations */}
+      <ChannelsGenericConfirmDialog />
 
       <ChannelsBulkApplyTemplateDialog
         open={open === 'bulkApplyTemplate'}
@@ -94,20 +84,6 @@ export function ChannelsDialogs() {
             }}
             currentRow={currentRow}
             showModelsPanel={true}
-          />
-
-          <ChannelsDeleteDialog
-            key={`channel-delete-${currentRow.id}`}
-            open={open === 'delete'}
-            onOpenChange={(isOpen) => {
-              if (!isOpen) {
-                setOpen(null);
-                setTimeout(() => {
-                  setCurrentRow(null);
-                }, 500);
-              }
-            }}
-            currentRow={currentRow}
           />
 
           {/* <ChannelsSettingsDialog
@@ -172,22 +148,6 @@ export function ChannelsDialogs() {
             onOpenChange={(isOpen) => {
               if (isOpen) {
                 setOpen('status');
-              } else {
-                setOpen(null);
-                setTimeout(() => {
-                  setCurrentRow(null);
-                }, 500);
-              }
-            }}
-            currentRow={currentRow}
-          />
-
-          <ChannelsArchiveDialog
-            key={`channel-archive-${currentRow.id}`}
-            open={open === 'archive'}
-            onOpenChange={(isOpen) => {
-              if (isOpen) {
-                setOpen('archive');
               } else {
                 setOpen(null);
                 setTimeout(() => {
