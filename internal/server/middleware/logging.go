@@ -34,7 +34,8 @@ func WithLoggingTracing(config tracing.Config) gin.HandlerFunc {
 		// Generate request ID for each request
 		requestID := tracing.GenerateRequestID()
 
-		// Set request ID header in response
+		// Set trace ID and request ID headers in response for client-side correlation
+		c.Header(traceHeader, traceID)
 		c.Header(requestHeader, requestID)
 
 		ctx := tracing.WithTraceID(c.Request.Context(), traceID)
