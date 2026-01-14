@@ -732,3 +732,123 @@ func (r *queryResolver) ChannelSuccessRates(ctx context.Context) ([]*ChannelSucc
 
 	return response, nil
 }
+
+// RequestLatencyStats is the resolver for the requestLatencyStats field.
+func (r *queryResolver) RequestLatencyStats(ctx context.Context) (*LatencyStats, error) {
+	ctx = scopes.WithUserScopeDecision(ctx, scopes.ScopeReadDashboard)
+
+	// Define latency buckets in milliseconds
+	buckets := []struct {
+		label string
+		min   int64
+		max   int64
+	}{
+		{"0-100ms", 0, 100},
+		{"100-500ms", 100, 500},
+		{"500ms-1s", 500, 1000},
+		{"1-3s", 1000, 3000},
+		{"3-5s", 3000, 5000},
+		{"5-10s", 5000, 10000},
+		{"10s+", 10000, 999999999},
+	}
+
+	var distribution []*LatencyDistribution
+	var totalCount int
+
+	// Get count for each bucket
+	for _, bucket := range buckets {
+		var count int
+		var err error
+
+		if bucket.max == 999999999 {
+			count, err = r.client.Request.Query().
+				Where(
+					request.MetricsLatencyMsNotNil(),
+					request.MetricsLatencyMsGTE(bucket.min),
+				).
+				Count(ctx)
+		} else {
+			count, err = r.client.Request.Query().
+				Where(
+					request.MetricsLatencyMsNotNil(),
+					request.MetricsLatencyMsGTE(bucket.min),
+					request.MetricsLatencyMsLT(bucket.max),
+				).
+				Count(ctx)
+		}
+
+		if err != nil {
+			log.Warn(ctx, "failed to count latency bucket",
+				log.String("bucket", bucket.label),
+				log.Cause(err))
+			continue
+		}
+
+		totalCount += count
+		distribution = append(distribution, &LatencyDistribution{
+			Range:      bucket.label,
+			Count:      count,
+			Percentage: 0,
+		})
+	}
+
+	// Calculate percentages
+	for _, dist := range distribution {
+		if totalCount > 0 {
+			dist.Percentage = float64(dist.Count) / float64(totalCount) * 100
+		}
+	}
+
+	// Get aggregate stats
+	type latencyAgg struct {
+		Avg float64 `json:"avg_latency"`
+		Min int64   `json:"min_latency"`
+		Max int64   `json:"max_latency"`
+	}
+
+	var aggResult []latencyAgg
+	err := r.client.Request.Query().
+		Where(request.MetricsLatencyMsNotNil()).
+		Modify(func(s *sql.Selector) {
+			s.Select(
+				sql.As(sql.Avg(request.FieldMetricsLatencyMs), "avg_latency"),
+				sql.As(sql.Min(request.FieldMetricsLatencyMs), "min_latency"),
+				sql.As(sql.Max(request.FieldMetricsLatencyMs), "max_latency"),
+			)
+		}).
+		Scan(ctx, &aggResult)
+
+	stats := &LatencyStats{
+		Distribution: distribution,
+	}
+
+	if err == nil && len(aggResult) > 0 {
+		stats.Average = lo.ToPtr(aggResult[0].Avg)
+		stats.Min = lo.ToPtr(float64(aggResult[0].Min))
+		stats.Max = lo.ToPtr(float64(aggResult[0].Max))
+	}
+
+	// Calculate percentiles (p50, p95, p99) using sampling for performance
+	var latencies []int64
+	err = r.client.Request.Query().
+		Where(request.MetricsLatencyMsNotNil()).
+		Order(ent.Asc(request.FieldMetricsLatencyMs)).
+		Limit(10000). // Sample limit for performance
+		Modify(func(s *sql.Selector) {
+			s.Select(request.FieldMetricsLatencyMs)
+		}).
+		Scan(ctx, &latencies)
+
+	if err == nil && len(latencies) > 0 {
+		n := len(latencies)
+		stats.P50 = lo.ToPtr(float64(latencies[n*50/100]))
+		stats.P95 = lo.ToPtr(float64(latencies[n*95/100]))
+		if n*99/100 < n {
+			stats.P99 = lo.ToPtr(float64(latencies[n*99/100]))
+		} else {
+			stats.P99 = lo.ToPtr(float64(latencies[n-1]))
+		}
+	}
+
+	return stats, nil
+}

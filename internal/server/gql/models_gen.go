@@ -133,6 +133,22 @@ type InitializeSystemPayload struct {
 	Token   *string   `json:"token,omitempty"`
 }
 
+type LatencyDistribution struct {
+	Range      string  `json:"range"`
+	Count      int     `json:"count"`
+	Percentage float64 `json:"percentage"`
+}
+
+type LatencyStats struct {
+	P50          *float64               `json:"p50,omitempty"`
+	P95          *float64               `json:"p95,omitempty"`
+	P99          *float64               `json:"p99,omitempty"`
+	Average      *float64               `json:"average,omitempty"`
+	Min          *float64               `json:"min,omitempty"`
+	Max          *float64               `json:"max,omitempty"`
+	Distribution []*LatencyDistribution `json:"distribution"`
+}
+
 type OnboardingInfo struct {
 	Onboarded          bool                          `json:"onboarded"`
 	Version            string                        `json:"version"`

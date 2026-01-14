@@ -447,6 +447,22 @@ type ComplexityRoot struct {
 		User    func(childComplexity int) int
 	}
 
+	LatencyDistribution struct {
+		Count      func(childComplexity int) int
+		Percentage func(childComplexity int) int
+		Range      func(childComplexity int) int
+	}
+
+	LatencyStats struct {
+		Average      func(childComplexity int) int
+		Distribution func(childComplexity int) int
+		Max          func(childComplexity int) int
+		Min          func(childComplexity int) int
+		P50          func(childComplexity int) int
+		P95          func(childComplexity int) int
+		P99          func(childComplexity int) int
+	}
+
 	Model struct {
 		AssociatedChannelCount func(childComplexity int) int
 		CreatedAt              func(childComplexity int) int
@@ -744,6 +760,7 @@ type ComplexityRoot struct {
 		QueryModelChannelConnections  func(childComplexity int, associations []*objects.ModelAssociation) int
 		QueryModels                   func(childComplexity int, input QueryModelsInput) int
 		QueryUnassociatedChannels     func(childComplexity int) int
+		RequestLatencyStats           func(childComplexity int) int
 		RequestStats                  func(childComplexity int) int
 		RequestStatsByAPIKey          func(childComplexity int) int
 		RequestStatsByChannel         func(childComplexity int) int
@@ -1421,6 +1438,7 @@ type QueryResolver interface {
 	TopRequestsProjects(ctx context.Context) ([]*TopRequestsProjects, error)
 	TokenStats(ctx context.Context) (*TokenStats, error)
 	ChannelSuccessRates(ctx context.Context) ([]*ChannelSuccessRate, error)
+	RequestLatencyStats(ctx context.Context) (*LatencyStats, error)
 	AllScopes(ctx context.Context, level *string) ([]*ScopeInfo, error)
 	Me(ctx context.Context) (*objects.UserInfo, error)
 	MyProjects(ctx context.Context) ([]*ent.Project, error)
@@ -2935,6 +2953,68 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.InitializeSystemPayload.User(childComplexity), true
+
+	case "LatencyDistribution.count":
+		if e.complexity.LatencyDistribution.Count == nil {
+			break
+		}
+
+		return e.complexity.LatencyDistribution.Count(childComplexity), true
+	case "LatencyDistribution.percentage":
+		if e.complexity.LatencyDistribution.Percentage == nil {
+			break
+		}
+
+		return e.complexity.LatencyDistribution.Percentage(childComplexity), true
+	case "LatencyDistribution.range":
+		if e.complexity.LatencyDistribution.Range == nil {
+			break
+		}
+
+		return e.complexity.LatencyDistribution.Range(childComplexity), true
+
+	case "LatencyStats.average":
+		if e.complexity.LatencyStats.Average == nil {
+			break
+		}
+
+		return e.complexity.LatencyStats.Average(childComplexity), true
+	case "LatencyStats.distribution":
+		if e.complexity.LatencyStats.Distribution == nil {
+			break
+		}
+
+		return e.complexity.LatencyStats.Distribution(childComplexity), true
+	case "LatencyStats.max":
+		if e.complexity.LatencyStats.Max == nil {
+			break
+		}
+
+		return e.complexity.LatencyStats.Max(childComplexity), true
+	case "LatencyStats.min":
+		if e.complexity.LatencyStats.Min == nil {
+			break
+		}
+
+		return e.complexity.LatencyStats.Min(childComplexity), true
+	case "LatencyStats.p50":
+		if e.complexity.LatencyStats.P50 == nil {
+			break
+		}
+
+		return e.complexity.LatencyStats.P50(childComplexity), true
+	case "LatencyStats.p95":
+		if e.complexity.LatencyStats.P95 == nil {
+			break
+		}
+
+		return e.complexity.LatencyStats.P95(childComplexity), true
+	case "LatencyStats.p99":
+		if e.complexity.LatencyStats.P99 == nil {
+			break
+		}
+
+		return e.complexity.LatencyStats.P99(childComplexity), true
 
 	case "Model.associatedChannelCount":
 		if e.complexity.Model.AssociatedChannelCount == nil {
@@ -4674,6 +4754,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.QueryUnassociatedChannels(childComplexity), true
+	case "Query.requestLatencyStats":
+		if e.complexity.Query.RequestLatencyStats == nil {
+			break
+		}
+
+		return e.complexity.Query.RequestLatencyStats(childComplexity), true
 	case "Query.requestStats":
 		if e.complexity.Query.RequestStats == nil {
 			break
@@ -16732,6 +16818,304 @@ func (ec *executionContext) fieldContext_InitializeSystemPayload_token(_ context
 	return fc, nil
 }
 
+func (ec *executionContext) _LatencyDistribution_range(ctx context.Context, field graphql.CollectedField, obj *LatencyDistribution) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LatencyDistribution_range,
+		func(ctx context.Context) (any, error) {
+			return obj.Range, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LatencyDistribution_range(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LatencyDistribution",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LatencyDistribution_count(ctx context.Context, field graphql.CollectedField, obj *LatencyDistribution) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LatencyDistribution_count,
+		func(ctx context.Context) (any, error) {
+			return obj.Count, nil
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LatencyDistribution_count(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LatencyDistribution",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LatencyDistribution_percentage(ctx context.Context, field graphql.CollectedField, obj *LatencyDistribution) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LatencyDistribution_percentage,
+		func(ctx context.Context) (any, error) {
+			return obj.Percentage, nil
+		},
+		nil,
+		ec.marshalNFloat2float64,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LatencyDistribution_percentage(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LatencyDistribution",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LatencyStats_p50(ctx context.Context, field graphql.CollectedField, obj *LatencyStats) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LatencyStats_p50,
+		func(ctx context.Context) (any, error) {
+			return obj.P50, nil
+		},
+		nil,
+		ec.marshalOFloat2ᚖfloat64,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_LatencyStats_p50(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LatencyStats",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LatencyStats_p95(ctx context.Context, field graphql.CollectedField, obj *LatencyStats) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LatencyStats_p95,
+		func(ctx context.Context) (any, error) {
+			return obj.P95, nil
+		},
+		nil,
+		ec.marshalOFloat2ᚖfloat64,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_LatencyStats_p95(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LatencyStats",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LatencyStats_p99(ctx context.Context, field graphql.CollectedField, obj *LatencyStats) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LatencyStats_p99,
+		func(ctx context.Context) (any, error) {
+			return obj.P99, nil
+		},
+		nil,
+		ec.marshalOFloat2ᚖfloat64,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_LatencyStats_p99(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LatencyStats",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LatencyStats_average(ctx context.Context, field graphql.CollectedField, obj *LatencyStats) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LatencyStats_average,
+		func(ctx context.Context) (any, error) {
+			return obj.Average, nil
+		},
+		nil,
+		ec.marshalOFloat2ᚖfloat64,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_LatencyStats_average(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LatencyStats",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LatencyStats_min(ctx context.Context, field graphql.CollectedField, obj *LatencyStats) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LatencyStats_min,
+		func(ctx context.Context) (any, error) {
+			return obj.Min, nil
+		},
+		nil,
+		ec.marshalOFloat2ᚖfloat64,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_LatencyStats_min(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LatencyStats",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LatencyStats_max(ctx context.Context, field graphql.CollectedField, obj *LatencyStats) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LatencyStats_max,
+		func(ctx context.Context) (any, error) {
+			return obj.Max, nil
+		},
+		nil,
+		ec.marshalOFloat2ᚖfloat64,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_LatencyStats_max(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LatencyStats",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LatencyStats_distribution(ctx context.Context, field graphql.CollectedField, obj *LatencyStats) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LatencyStats_distribution,
+		func(ctx context.Context) (any, error) {
+			return obj.Distribution, nil
+		},
+		nil,
+		ec.marshalNLatencyDistribution2ᚕᚖgithubᚗcomᚋloopljᚋaxonhubᚋinternalᚋserverᚋgqlᚐLatencyDistributionᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LatencyStats_distribution(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LatencyStats",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "range":
+				return ec.fieldContext_LatencyDistribution_range(ctx, field)
+			case "count":
+				return ec.fieldContext_LatencyDistribution_count(ctx, field)
+			case "percentage":
+				return ec.fieldContext_LatencyDistribution_percentage(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type LatencyDistribution", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Model_id(ctx context.Context, field graphql.CollectedField, obj *ent.Model) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -25618,6 +26002,51 @@ func (ec *executionContext) fieldContext_Query_channelSuccessRates(_ context.Con
 				return ec.fieldContext_ChannelSuccessRate_successRate(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type ChannelSuccessRate", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_requestLatencyStats(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_requestLatencyStats,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Query().RequestLatencyStats(ctx)
+		},
+		nil,
+		ec.marshalNLatencyStats2ᚖgithubᚗcomᚋloopljᚋaxonhubᚋinternalᚋserverᚋgqlᚐLatencyStats,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_requestLatencyStats(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "p50":
+				return ec.fieldContext_LatencyStats_p50(ctx, field)
+			case "p95":
+				return ec.fieldContext_LatencyStats_p95(ctx, field)
+			case "p99":
+				return ec.fieldContext_LatencyStats_p99(ctx, field)
+			case "average":
+				return ec.fieldContext_LatencyStats_average(ctx, field)
+			case "min":
+				return ec.fieldContext_LatencyStats_min(ctx, field)
+			case "max":
+				return ec.fieldContext_LatencyStats_max(ctx, field)
+			case "distribution":
+				return ec.fieldContext_LatencyStats_distribution(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type LatencyStats", field.Name)
 		},
 	}
 	return fc, nil
@@ -61966,6 +62395,106 @@ func (ec *executionContext) _InitializeSystemPayload(ctx context.Context, sel as
 	return out
 }
 
+var latencyDistributionImplementors = []string{"LatencyDistribution"}
+
+func (ec *executionContext) _LatencyDistribution(ctx context.Context, sel ast.SelectionSet, obj *LatencyDistribution) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, latencyDistributionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("LatencyDistribution")
+		case "range":
+			out.Values[i] = ec._LatencyDistribution_range(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "count":
+			out.Values[i] = ec._LatencyDistribution_count(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "percentage":
+			out.Values[i] = ec._LatencyDistribution_percentage(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var latencyStatsImplementors = []string{"LatencyStats"}
+
+func (ec *executionContext) _LatencyStats(ctx context.Context, sel ast.SelectionSet, obj *LatencyStats) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, latencyStatsImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("LatencyStats")
+		case "p50":
+			out.Values[i] = ec._LatencyStats_p50(ctx, field, obj)
+		case "p95":
+			out.Values[i] = ec._LatencyStats_p95(ctx, field, obj)
+		case "p99":
+			out.Values[i] = ec._LatencyStats_p99(ctx, field, obj)
+		case "average":
+			out.Values[i] = ec._LatencyStats_average(ctx, field, obj)
+		case "min":
+			out.Values[i] = ec._LatencyStats_min(ctx, field, obj)
+		case "max":
+			out.Values[i] = ec._LatencyStats_max(ctx, field, obj)
+		case "distribution":
+			out.Values[i] = ec._LatencyStats_distribution(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var modelImplementors = []string{"Model", "Node"}
 
 func (ec *executionContext) _Model(ctx context.Context, sel ast.SelectionSet, obj *ent.Model) graphql.Marshaler {
@@ -65003,6 +65532,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_channelSuccessRates(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "requestLatencyStats":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_requestLatencyStats(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -72883,6 +73434,74 @@ func (ec *executionContext) marshalNJSONRawMessageInput2githubᚗcomᚋloopljᚋ
 		return graphql.Null
 	}
 	return v
+}
+
+func (ec *executionContext) marshalNLatencyDistribution2ᚕᚖgithubᚗcomᚋloopljᚋaxonhubᚋinternalᚋserverᚋgqlᚐLatencyDistributionᚄ(ctx context.Context, sel ast.SelectionSet, v []*LatencyDistribution) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNLatencyDistribution2ᚖgithubᚗcomᚋloopljᚋaxonhubᚋinternalᚋserverᚋgqlᚐLatencyDistribution(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNLatencyDistribution2ᚖgithubᚗcomᚋloopljᚋaxonhubᚋinternalᚋserverᚋgqlᚐLatencyDistribution(ctx context.Context, sel ast.SelectionSet, v *LatencyDistribution) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._LatencyDistribution(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNLatencyStats2githubᚗcomᚋloopljᚋaxonhubᚋinternalᚋserverᚋgqlᚐLatencyStats(ctx context.Context, sel ast.SelectionSet, v LatencyStats) graphql.Marshaler {
+	return ec._LatencyStats(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNLatencyStats2ᚖgithubᚗcomᚋloopljᚋaxonhubᚋinternalᚋserverᚋgqlᚐLatencyStats(ctx context.Context, sel ast.SelectionSet, v *LatencyStats) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._LatencyStats(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNModel2githubᚗcomᚋloopljᚋaxonhubᚋinternalᚋentᚐModel(ctx context.Context, sel ast.SelectionSet, v ent.Model) graphql.Marshaler {

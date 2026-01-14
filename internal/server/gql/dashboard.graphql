@@ -83,6 +83,22 @@ type ChannelSuccessRate {
   successRate: Float!
 }
 
+type LatencyDistribution {
+  range: String!
+  count: Int!
+  percentage: Float!
+}
+
+type LatencyStats {
+  p50: Float
+  p95: Float
+  p99: Float
+  average: Float
+  min: Float
+  max: Float
+  distribution: [LatencyDistribution!]!
+}
+
 extend type Query {
   dashboardOverview: DashboardOverview!
   requestStats: RequestStats!
@@ -94,4 +110,5 @@ extend type Query {
   topRequestsProjects: [TopRequestsProjects!]!
   tokenStats: TokenStats!
   channelSuccessRates: [ChannelSuccessRate!]!
+  requestLatencyStats: LatencyStats!
 }

@@ -29,7 +29,11 @@
       "requestsByModelDescription": "Distribution of requests across different AI models.",
       "requestsByAPIKeyDescription": "Distribution of requests across different API keys.",
       "tokensByAPIKeyDescription": "Token usage breakdown for top 3 API keys.",
-      "channelSuccessRateDescription": "Success rate of requests across different channels."
+      "channelSuccessRateDescription": "Success rate of requests across different channels.",
+      "latencyDistribution": "Request Latency Distribution",
+      "latencyDistributionDescription": "Distribution of request latencies across different time ranges.",
+      "errorLoadingLatencyData": "Error loading latency data:",
+      "noLatencyData": "No latency data available"
     },
     "stats": {
       "totalUsersInSystem": "Total users in system",

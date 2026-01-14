@@ -97,6 +97,26 @@ export const tokenStatsSchema = z.object({
 
 export type TokenStats = z.infer<typeof tokenStatsSchema>;
 
+// Latency Distribution
+export const latencyDistributionSchema = z.object({
+  range: z.string(),
+  count: z.number(),
+  percentage: z.number(),
+});
+
+export const latencyStatsSchema = z.object({
+  p50: z.number().nullable(),
+  p95: z.number().nullable(),
+  p99: z.number().nullable(),
+  average: z.number().nullable(),
+  min: z.number().nullable(),
+  max: z.number().nullable(),
+  distribution: z.array(latencyDistributionSchema),
+});
+
+export type LatencyDistribution = z.infer<typeof latencyDistributionSchema>;
+export type LatencyStats = z.infer<typeof latencyStatsSchema>;
+
 // GraphQL queries
 const DASHBOARD_STATS_QUERY = `
   query GetDashboardStats {
@@ -220,6 +240,24 @@ const TOKEN_STATS_AGGR_QUERY = `
   }
 `;
 
+const LATENCY_STATS_QUERY = `
+  query GetLatencyStats {
+    requestLatencyStats {
+      p50
+      p95
+      p99
+      average
+      min
+      max
+      distribution {
+        range
+        count
+        percentage
+      }
+    }
+  }
+`;
+
 // Query hooks
 export function useDashboardStats() {
   return useQuery({
@@ -326,6 +364,17 @@ export function useChannelSuccessRates() {
     queryFn: async () => {
       const data = await graphqlRequest<{ channelSuccessRates: ChannelSuccessRate[] }>(CHANNEL_SUCCESS_RATES_QUERY);
       return data.channelSuccessRates.map((item) => channelSuccessRateSchema.parse(item));
+    },
+    refetchInterval: 300000,
+  });
+}
+
+export function useLatencyStats() {
+  return useQuery({
+    queryKey: ['latencyStats'],
+    queryFn: async () => {
+      const data = await graphqlRequest<{ requestLatencyStats: LatencyStats }>(LATENCY_STATS_QUERY);
+      return latencyStatsSchema.parse(data.requestLatencyStats);
     },
     refetchInterval: 300000,
   });

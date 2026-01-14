@@ -29,7 +29,11 @@
       "requestsByModelDescription": "不同AI模型的请求分布情况。",
       "requestsByAPIKeyDescription": "不同API密钥的请求分布情况。",
       "tokensByAPIKeyDescription": "前3个API密钥的令牌使用情况。",
-      "channelSuccessRateDescription": "不同渠道的请求成功率情况。"
+      "channelSuccessRateDescription": "不同渠道的请求成功率情况。",
+      "latencyDistribution": "请求延迟分布",
+      "latencyDistributionDescription": "不同时间范围内的请求延迟分布情况。",
+      "errorLoadingLatencyData": "加载延迟数据失败:",
+      "noLatencyData": "暂无延迟数据"
     },
     "stats": {
       "totalUsersInSystem": "系统用户总数",

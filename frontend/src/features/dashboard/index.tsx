@@ -5,6 +5,7 @@ import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { Header } from '@/components/layout/header';
 import { ChannelSuccessRate } from './components/channel-success-rate';
 import { DailyRequestStats } from './components/daily-requests-stats';
+import { LatencyDistributionChart } from './components/latency-distribution-chart';
 import { RequestsByChannelChart } from './components/requests-by-channel-chart';
 import { RequestsByModelChart } from './components/requests-by-model-chart';
 import { RequestsByAPIKeyChart } from './components/requests-by-api-key-chart';
@@ -125,6 +126,17 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <TokensByAPIKeyChart />
+              </CardContent>
+            </Card>
+          </div>
+          <div className='grid gap-4 md:grid-cols-1'>
+            <Card className='hover-card'>
+              <CardHeader>
+                <CardTitle>{t('dashboard.charts.latencyDistribution')}</CardTitle>
+                <CardDescription>{t('dashboard.charts.latencyDistributionDescription')}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <LatencyDistributionChart />
               </CardContent>
             </Card>
           </div>
