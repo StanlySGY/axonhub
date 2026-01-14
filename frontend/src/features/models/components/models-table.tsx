@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { format } from 'date-fns';
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -19,7 +18,6 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { IconBan, IconCheck, IconX, IconTrash } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -28,6 +26,7 @@ import { PermissionGuard } from '@/components/permission-guard';
 import { ServerSidePagination } from '@/components/server-side-pagination';
 import { useModels } from '../context/models-context';
 import { Model, ModelConnection } from '../data/schema';
+import { ModelExpandedRow } from './model-expanded-row';
 
 const MotionTableRow = motion(TableRow);
 
@@ -189,10 +188,7 @@ export function ModelsTable({
             {loading ? (
               <TableSkeleton rows={pageSize} columns={columns.length} />
             ) : table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => {
-                const model = row.original;
-                const modelCard = model.modelCard;
-                return (
+              table.getRowModel().rows.map((row) => (
                   <React.Fragment key={row.id}>
                     <MotionTableRow
                       key={row.id}
@@ -208,196 +204,21 @@ export function ModelsTable({
                     <AnimatePresence>
                       {row.getIsExpanded() && (
                         <TableRow key={`${row.id}-expanded`} className='border-0'>
-                          <TableCell colSpan={columns.length} className='p-0 border-0'>
+                          <TableCell colSpan={columns.length} className='border-0 p-0'>
                             <motion.div
                               initial={{ height: 0, opacity: 0 }}
                               animate={{ height: 'auto', opacity: 1 }}
                               exit={{ height: 0, opacity: 0 }}
                               transition={{ duration: 0.2, ease: 'easeInOut' }}
-                              className='bg-muted/30 p-6 hover:bg-muted/50'
                             >
-                              <div className='space-y-6'>
-                            {/* Top Section: Basic Info (left) + Capabilities (right) */}
-                            <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
-                              {/* Basic Info */}
-                              <div className='space-y-3'>
-                                <h4 className='text-sm font-semibold'>{t('models.expandedRow.basic')}</h4>
-                                <div className='space-y-2 text-sm'>
-                                  <div className='flex justify-between'>
-                                    <span className='text-muted-foreground'>{t('models.columns.modelId')}:</span>
-                                    <span className='font-mono text-xs'>{model.modelID}</span>
-                                  </div>
-                                  <div className='flex items-center justify-between'>
-                                    <span className='text-muted-foreground'>{t('models.columns.developer')}:</span>
-                                    <Badge variant='outline'>{model.developer}</Badge>
-                                  </div>
-                                  <div className='flex items-center justify-between'>
-                                    <span className='text-muted-foreground'>{t('models.columns.group')}:</span>
-                                    <span>{model.group}</span>
-                                  </div>
-                                  <div className='flex justify-between'>
-                                    <span className='text-muted-foreground'>{t('common.columns.createdAt')}:</span>
-                                    <span>{format(model.createdAt, 'yyyy-MM-dd HH:mm')}</span>
-                                  </div>
-                                  <div className='flex justify-between'>
-                                    <span className='text-muted-foreground'>{t('common.columns.updatedAt')}:</span>
-                                    <span>{format(model.updatedAt, 'yyyy-MM-dd HH:mm')}</span>
-                                  </div>
-                                  {model.remark && (
-                                    <div className='flex justify-between'>
-                                      <span className='text-muted-foreground'>{t('models.columns.remark')}:</span>
-                                      <span className='max-w-[200px] truncate text-right' title={model.remark}>
-                                        {model.remark}
-                                      </span>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-
-                              {/* Capabilities */}
-                              <div className='space-y-3'>
-                                <h4 className='text-sm font-semibold'>{t('models.expandedRow.capabilities')}</h4>
-                                <div className='space-y-2 text-sm'>
-                                  <div className='flex items-center justify-between'>
-                                    <span className='text-muted-foreground'>{t('models.modelCard.toolCall')}:</span>
-                                    <span>{modelCard?.toolCall ? <IconCheck className='h-4 w-4 text-green-600' /> : '-'}</span>
-                                  </div>
-                                  <div className='flex items-center justify-between'>
-                                    <span className='text-muted-foreground'>{t('models.modelCard.vision')}:</span>
-                                    <span>{modelCard?.vision ? <IconCheck className='h-4 w-4 text-green-600' /> : '-'}</span>
-                                  </div>
-                                  <div className='flex items-center justify-between'>
-                                    <span className='text-muted-foreground'>{t('models.modelCard.temperature')}:</span>
-                                    <span>{modelCard?.temperature ? <IconCheck className='h-4 w-4 text-green-600' /> : '-'}</span>
-                                  </div>
-                                  {/* Reasoning grouped */}
-                                  <div className='space-y-1'>
-                                    <span className='text-muted-foreground'>{t('models.modelCard.reasoning')}:</span>
-                                    <div className='ml-4 space-y-1'>
-                                      <div className='flex items-center justify-between'>
-                                        <span className='text-muted-foreground text-xs'>{t('models.modelCard.reasoningSupported')}:</span>
-                                        <span>
-                                          {modelCard?.reasoning?.supported ? <IconCheck className='h-4 w-4 text-green-600' /> : '-'}
-                                        </span>
-                                      </div>
-                                      <div className='flex items-center justify-between'>
-                                        <span className='text-muted-foreground text-xs'>{t('models.modelCard.reasoningDefault')}:</span>
-                                        <span>
-                                          {modelCard?.reasoning?.default ? <IconCheck className='h-4 w-4 text-green-600' /> : '-'}
-                                        </span>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Middle Section: Modalities + Limits (left) | Cost (right) */}
-                            <div className='grid grid-cols-1 gap-6 border-t pt-4 md:grid-cols-2'>
-                              {/* Left: Modalities + Limits */}
-                              <div className='space-y-4'>
-                                {/* Modalities */}
-                                <div className='space-y-3'>
-                                  <h4 className='text-sm font-semibold'>{t('models.modelCard.modalities')}</h4>
-                                  <div className='space-y-2 text-sm'>
-                                    <div className='flex items-start gap-2'>
-                                      <span className='text-muted-foreground shrink-0'>{t('models.modelCard.input')}:</span>
-                                      <div className='flex flex-wrap gap-1'>
-                                        {modelCard?.modalities?.input?.length
-                                          ? modelCard.modalities.input.map((m) => (
-                                              <Badge key={m} variant='outline' className='text-xs'>
-                                                {m}
-                                              </Badge>
-                                            ))
-                                          : '-'}
-                                      </div>
-                                    </div>
-                                    <div className='flex items-start gap-2'>
-                                      <span className='text-muted-foreground shrink-0'>{t('models.modelCard.output')}:</span>
-                                      <div className='flex flex-wrap gap-1'>
-                                        {modelCard?.modalities?.output?.length
-                                          ? modelCard.modalities.output.map((m) => (
-                                              <Badge key={m} variant='outline' className='text-xs'>
-                                                {m}
-                                              </Badge>
-                                            ))
-                                          : '-'}
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-
-                                {/* Limits */}
-                                <div className='space-y-3'>
-                                  <h4 className='text-sm font-semibold'>{t('models.modelCard.limit')}</h4>
-                                  <div className='space-y-2 text-sm'>
-                                    <div className='flex justify-between'>
-                                      <span className='text-muted-foreground'>{t('models.modelCard.context')}:</span>
-                                      <span className='font-mono text-xs'>{modelCard?.limit?.context?.toLocaleString() ?? '-'}</span>
-                                    </div>
-                                    <div className='flex justify-between'>
-                                      <span className='text-muted-foreground'>{t('models.modelCard.output')}:</span>
-                                      <span className='font-mono text-xs'>{modelCard?.limit?.output?.toLocaleString() ?? '-'}</span>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Right: Cost */}
-                              <div className='space-y-3'>
-                                <h4 className='text-sm font-semibold'>{t('models.modelCard.cost')} ($/M)</h4>
-                                <div className='space-y-2 text-sm'>
-                                  <div className='flex justify-between'>
-                                    <span className='text-muted-foreground'>{t('models.modelCard.input')}:</span>
-                                    <span className='font-mono text-xs'>{modelCard?.cost?.input ?? '-'}</span>
-                                  </div>
-                                  <div className='flex justify-between'>
-                                    <span className='text-muted-foreground'>{t('models.modelCard.output')}:</span>
-                                    <span className='font-mono text-xs'>{modelCard?.cost?.output ?? '-'}</span>
-                                  </div>
-                                  {modelCard?.cost?.cacheRead !== undefined && (
-                                    <div className='flex justify-between'>
-                                      <span className='text-muted-foreground'>{t('models.modelCard.cacheRead')}:</span>
-                                      <span className='font-mono text-xs'>{modelCard.cost.cacheRead}</span>
-                                    </div>
-                                  )}
-                                  {modelCard?.cost?.cacheWrite !== undefined && (
-                                    <div className='flex justify-between'>
-                                      <span className='text-muted-foreground'>{t('models.modelCard.cacheWrite')}:</span>
-                                      <span className='font-mono text-xs'>{modelCard.cost.cacheWrite}</span>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Bottom Section: Dates */}
-                            <div className='border-t pt-4'>
-                              <h4 className='mb-3 text-sm font-semibold'>{t('models.modelCard.dates')}</h4>
-                              <div className='flex gap-6 text-sm'>
-                                <div className='flex gap-2'>
-                                  <span className='text-muted-foreground'>{t('models.modelCard.knowledge')}:</span>
-                                  <span>{modelCard?.knowledge || '-'}</span>
-                                </div>
-                                <div className='flex gap-2'>
-                                  <span className='text-muted-foreground'>{t('models.modelCard.releaseDate')}:</span>
-                                  <span>{modelCard?.releaseDate || '-'}</span>
-                                </div>
-                                <div className='flex gap-2'>
-                                  <span className='text-muted-foreground'>{t('models.modelCard.lastUpdated')}:</span>
-                                  <span>{modelCard?.lastUpdated || '-'}</span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </motion.div>
-                    </TableCell>
-                  </TableRow>
-                    )}
-                  </AnimatePresence>
-                </React.Fragment>
-                );
-              })
+                              <ModelExpandedRow model={row.original} />
+                            </motion.div>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </AnimatePresence>
+                  </React.Fragment>
+                ))
             ) : (
               <TableRow className='!bg-[var(--table-background)]'>
                 <TableCell colSpan={columns.length} className='h-24 !bg-[var(--table-background)] text-center'>
