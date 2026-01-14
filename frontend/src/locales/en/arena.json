@@ -6,6 +6,7 @@
     "addPanel": "Add Panel",
     "panelCount": "{{count}} of {{max}} panels",
     "selectModel": "Select model",
+    "selectChannel": "Select channel",
     "waitingForInput": "Waiting for input...",
     "latency": "Latency",
     "tokens": "Tokens",

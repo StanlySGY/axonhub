@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useChannelModels } from '@/hooks/use-channel-models';
+import { useModelSelection } from '@/hooks/use-model-selection';
 
 export interface PlaygroundSettings {
   model: string;
@@ -12,10 +12,15 @@ export interface PlaygroundSettings {
 
 export function usePlaygroundSettings() {
   const { t } = useTranslation();
-  const { modelOptions, isLoading: channelsLoading, channelCount } = useChannelModels();
+  const {
+    uniqueModels,
+    getChannelsForModel,
+    getDefaultChannel,
+    isLoading: channelsLoading,
+    channelCount,
+  } = useModelSelection();
 
-  const [selectedGroupModel, setSelectedGroupModel] = useState('');
-  const [model, setModel] = useState('gpt-4o');
+  const [model, setModel] = useState('');
   const [selectedChannel, setSelectedChannel] = useState<string | null>(null);
   const [temperature, setTemperature] = useState(0.6);
   const [maxTokens, setMaxTokens] = useState(4096);
@@ -35,27 +40,35 @@ export function usePlaygroundSettings() {
     settingsRef.current = { model, selectedChannel, temperature, maxTokens, systemPrompt };
   }, [model, selectedChannel, temperature, maxTokens, systemPrompt]);
 
-  const handleModelChange = useCallback((newModel: string) => {
-    setSelectedGroupModel(newModel);
-    const parts = newModel.split('|');
-    if (parts.length >= 2) {
-      setModel(parts[1]);
-      setSelectedChannel(parts[0]);
-    }
+  // Handle model change - auto-select default channel
+  const handleModelChange = useCallback(
+    (newModel: string) => {
+      setModel(newModel);
+      const defaultChannel = getDefaultChannel(newModel);
+      setSelectedChannel(defaultChannel);
+    },
+    [getDefaultChannel]
+  );
+
+  // Handle channel change
+  const handleChannelChange = useCallback((channelId: string) => {
+    setSelectedChannel(channelId);
   }, []);
 
-  // Auto-select first model
+  // Get available channels for current model
+  const availableChannels = getChannelsForModel(model);
+
+  // Auto-select first model on load
   useEffect(() => {
-    if (!selectedGroupModel && modelOptions.length > 0) {
-      handleModelChange(modelOptions[0].value);
+    if (!model && uniqueModels.length > 0) {
+      handleModelChange(uniqueModels[0].value);
     }
-  }, [modelOptions, handleModelChange, selectedGroupModel]);
+  }, [uniqueModels, handleModelChange, model]);
 
   const getSettings = useCallback(() => settingsRef.current, []);
 
   return {
     // State values
-    selectedGroupModel,
     model,
     selectedChannel,
     temperature,
@@ -66,8 +79,11 @@ export function usePlaygroundSettings() {
     setMaxTokens,
     setSystemPrompt,
     handleModelChange,
-    // Model options
-    modelOptions,
+    handleChannelChange,
+    // Model options (new API)
+    modelOptions: uniqueModels,
+    channelOptions: availableChannels,
+    // Loading state
     channelsLoading,
     channelCount,
     // Ref accessor for callbacks

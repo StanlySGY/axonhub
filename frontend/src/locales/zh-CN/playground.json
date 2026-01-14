@@ -5,6 +5,8 @@
     "settings": {
       "model": "模型",
       "selectModel": "选择模型",
+      "channel": "渠道",
+      "selectChannel": "选择渠道",
       "temperature": "温度",
       "maxTokens": "最大令牌数",
       "systemPrompt": "系统提示",
@@ -23,6 +25,7 @@
     "errors": {
       "noChannelsAvailable": "没有可用的模型"
     },
-    "modelsAvailable": "{{count}} 个模型可用，跨 {{channels}} 个渠道"
+    "modelsAvailable": "{{count}} 个模型可用，跨 {{channels}} 个渠道",
+    "channelsAvailable": "{{count}} 个渠道可用"
   }
 }

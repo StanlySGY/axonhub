@@ -5,6 +5,8 @@
     "settings": {
       "model": "Model",
       "selectModel": "Select a model",
+      "channel": "Channel",
+      "selectChannel": "Select a channel",
       "temperature": "Temperature",
       "maxTokens": "Max Tokens",
       "systemPrompt": "System Prompt",
@@ -23,6 +25,7 @@
     "errors": {
       "noChannelsAvailable": "No models available"
     },
-    "modelsAvailable": "{{count}} models available across {{channels}} channels"
+    "modelsAvailable": "{{count}} models available across {{channels}} channels",
+    "channelsAvailable": "{{count}} channels available"
   }
 }

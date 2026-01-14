@@ -6,6 +6,7 @@
     "addPanel": "添加面板",
     "panelCount": "{{count}} / {{max}} 个面板",
     "selectModel": "选择模型",
+    "selectChannel": "选择渠道",
     "waitingForInput": "等待输入...",
     "latency": "延迟",
     "tokens": "令牌",

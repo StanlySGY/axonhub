@@ -30,7 +30,8 @@ export default function Playground() {
   const [input, setInput] = useState('');
 
   const {
-    selectedGroupModel,
+    model,
+    selectedChannel,
     temperature,
     maxTokens,
     systemPrompt,
@@ -38,7 +39,9 @@ export default function Playground() {
     setMaxTokens,
     setSystemPrompt,
     handleModelChange,
+    handleChannelChange,
     modelOptions,
+    channelOptions,
     channelsLoading,
     channelCount,
     getSettings,
@@ -187,7 +190,7 @@ export default function Playground() {
               {t('playground.settings.model')}
             </Label>
             <AutoCompleteSelect
-              selectedValue={selectedGroupModel as string}
+              selectedValue={model}
               onSelectedValueChange={(v) => handleModelChange(v)}
               items={modelOptions}
               isLoading={channelsLoading}
@@ -204,6 +207,25 @@ export default function Playground() {
               </p>
             )}
           </div>
+
+          {channelOptions.length > 1 && (
+            <div className='space-y-3'>
+              <Label htmlFor='channel' className='text-xs font-semibold'>
+                {t('playground.settings.channel')}
+              </Label>
+              <AutoCompleteSelect
+                selectedValue={selectedChannel || ''}
+                onSelectedValueChange={(v) => handleChannelChange(v)}
+                items={channelOptions}
+                isLoading={channelsLoading}
+                emptyMessage={t('playground.errors.noChannelsAvailable')}
+                placeholder={t('playground.settings.selectChannel')}
+              />
+              <p className='text-muted-foreground text-[10px]'>
+                {t('playground.channelsAvailable', { count: channelOptions.length })}
+              </p>
+            </div>
+          )}
 
           <div className='space-y-3'>
             <Label htmlFor='temperature' className='text-xs font-semibold'>

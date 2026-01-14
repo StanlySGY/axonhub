@@ -1,15 +1,16 @@
-import { useMemo, useCallback } from 'react';
-import { X, Clock, Zap, Coins, Copy } from 'lucide-react';
+import { useMemo, useCallback, useState, useEffect } from 'react';
+import { X, Clock, Zap, Coins, Copy, ChevronDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { AutoCompleteSelect } from '@/components/auto-complete-select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Conversation, ConversationContent, ConversationScrollButton } from '@/components/ai-elements/conversation';
 import { Message, MessageContent } from '@/components/ai-elements/message';
 import { Response as UIResponse } from '@/components/ai-elements/response';
 import { Loader } from '@/components/ai-elements/loader';
 import { Actions, Action } from '@/components/ai-elements/actions';
-import { useChannelModels } from '@/hooks/use-channel-models';
+import { useModelSelection } from '@/hooks/use-model-selection';
 import { useArenaStore } from '../stores/arenaStore';
 import type { ArenaPanelConfig, ArenaPanelState } from '../types';
 
@@ -22,17 +23,47 @@ interface ArenaPanelProps {
 export function ArenaPanel({ panel, state, canRemove }: ArenaPanelProps) {
   const { t } = useTranslation();
   const { updatePanel, removePanel } = useArenaStore();
-  const { modelOptions, isLoading: channelsLoading } = useChannelModels();
+  const { uniqueModels, getChannelsForModel, getDefaultChannel, isLoading: channelsLoading } = useModelSelection();
 
-  const selectedValue = panel.channelId && panel.model ? `${panel.channelId}|${panel.model}` : '';
+  const [channelPopoverOpen, setChannelPopoverOpen] = useState(false);
 
+  // Get available channels for current model
+  const availableChannels = useMemo(() => {
+    if (!panel.model) return [];
+    return getChannelsForModel(panel.model);
+  }, [panel.model, getChannelsForModel]);
+
+  // Get current channel name
+  const currentChannelName = useMemo(() => {
+    if (!panel.channelId) return '';
+    const channel = availableChannels.find((ch) => ch.value === panel.channelId);
+    return channel?.label || '';
+  }, [panel.channelId, availableChannels]);
+
+  // Handle model change - auto-select default channel
   const handleModelChange = useCallback(
-    (value: string) => {
-      const [channelId, model] = value.split('|');
-      updatePanel(panel.id, { channelId, model });
+    (model: string) => {
+      const defaultChannel = getDefaultChannel(model);
+      updatePanel(panel.id, { model, channelId: defaultChannel || undefined });
+    },
+    [panel.id, updatePanel, getDefaultChannel]
+  );
+
+  // Handle channel change
+  const handleChannelChange = useCallback(
+    (channelId: string) => {
+      updatePanel(panel.id, { channelId });
+      setChannelPopoverOpen(false);
     },
     [panel.id, updatePanel]
   );
+
+  // Auto-select first model if none selected
+  useEffect(() => {
+    if (!panel.model && uniqueModels.length > 0) {
+      handleModelChange(uniqueModels[0].value);
+    }
+  }, [panel.model, uniqueModels, handleModelChange]);
 
   const isStreaming = state?.isStreaming ?? false;
   const content = state?.content ?? '';
@@ -44,19 +75,52 @@ export function ArenaPanel({ panel, state, canRemove }: ArenaPanelProps) {
 
   return (
     <div className="bg-card border-border flex h-full flex-col rounded-xl border">
-      <div className="flex items-center justify-between border-b p-3">
-        <div className="flex-1 pr-2">
+      <div className="flex items-center justify-between gap-2 border-b p-3">
+        {/* Model Selector */}
+        <div className="min-w-0 flex-1">
           <AutoCompleteSelect
-            selectedValue={selectedValue}
+            selectedValue={panel.model || ''}
             onSelectedValueChange={handleModelChange}
-            items={modelOptions}
+            items={uniqueModels}
             isLoading={channelsLoading}
             emptyMessage={t('playground.errors.noChannelsAvailable')}
             placeholder={t('arena.selectModel')}
           />
         </div>
+
+        {/* Channel Badge (only show if multiple channels available) */}
+        {availableChannels.length > 1 && (
+          <Popover open={channelPopoverOpen} onOpenChange={setChannelPopoverOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 shrink-0 gap-1 px-2 text-xs"
+              >
+                <span className="max-w-[80px] truncate">{currentChannelName || t('arena.selectChannel')}</span>
+                <ChevronDown className="h-3 w-3" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-48 p-1" align="end">
+              <div className="space-y-1">
+                {availableChannels.map((channel) => (
+                  <Button
+                    key={channel.value}
+                    variant={channel.value === panel.channelId ? 'secondary' : 'ghost'}
+                    size="sm"
+                    className="w-full justify-start text-xs"
+                    onClick={() => handleChannelChange(channel.value)}
+                  >
+                    {channel.label}
+                  </Button>
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
+        )}
+
         {canRemove && (
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => removePanel(panel.id)}>
+          <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => removePanel(panel.id)}>
             <X className="h-4 w-4" />
           </Button>
         )}
