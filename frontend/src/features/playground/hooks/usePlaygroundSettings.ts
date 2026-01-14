@@ -13,15 +13,16 @@ export interface PlaygroundSettings {
 export function usePlaygroundSettings() {
   const { t } = useTranslation();
   const {
-    uniqueModels,
-    getChannelsForModel,
+    channelOptions,
+    getModelsForChannel,
+    getDefaultModel,
     getDefaultChannel,
     isLoading: channelsLoading,
     channelCount,
   } = useModelSelection();
 
-  const [model, setModel] = useState('');
   const [selectedChannel, setSelectedChannel] = useState<string | null>(null);
+  const [model, setModel] = useState('');
   const [temperature, setTemperature] = useState(0.6);
   const [maxTokens, setMaxTokens] = useState(4096);
   const [systemPrompt, setSystemPrompt] = useState(t('playground.settings.defaultSystemPrompt'));
@@ -40,37 +41,40 @@ export function usePlaygroundSettings() {
     settingsRef.current = { model, selectedChannel, temperature, maxTokens, systemPrompt };
   }, [model, selectedChannel, temperature, maxTokens, systemPrompt]);
 
-  // Handle model change - auto-select default channel
-  const handleModelChange = useCallback(
-    (newModel: string) => {
-      setModel(newModel);
-      const defaultChannel = getDefaultChannel(newModel);
-      setSelectedChannel(defaultChannel);
+  // Handle channel change - auto-select first model
+  const handleChannelChange = useCallback(
+    (channelId: string) => {
+      setSelectedChannel(channelId);
+      const defaultModel = getDefaultModel(channelId);
+      setModel(defaultModel || '');
     },
-    [getDefaultChannel]
+    [getDefaultModel]
   );
 
-  // Handle channel change
-  const handleChannelChange = useCallback((channelId: string) => {
-    setSelectedChannel(channelId);
+  // Handle model change
+  const handleModelChange = useCallback((newModel: string) => {
+    setModel(newModel);
   }, []);
 
-  // Get available channels for current model
-  const availableChannels = getChannelsForModel(model);
+  // Get available models for current channel
+  const modelOptions = getModelsForChannel(selectedChannel || '');
 
-  // Auto-select first model on load
+  // Auto-select first channel on load
   useEffect(() => {
-    if (!model && uniqueModels.length > 0) {
-      handleModelChange(uniqueModels[0].value);
+    if (!selectedChannel && channelOptions.length > 0) {
+      const defaultChannel = getDefaultChannel();
+      if (defaultChannel) {
+        handleChannelChange(defaultChannel);
+      }
     }
-  }, [uniqueModels, handleModelChange, model]);
+  }, [channelOptions, handleChannelChange, selectedChannel, getDefaultChannel]);
 
   const getSettings = useCallback(() => settingsRef.current, []);
 
   return {
     // State values
-    model,
     selectedChannel,
+    model,
     temperature,
     maxTokens,
     systemPrompt,
@@ -78,11 +82,11 @@ export function usePlaygroundSettings() {
     setTemperature,
     setMaxTokens,
     setSystemPrompt,
-    handleModelChange,
     handleChannelChange,
-    // Model options (new API)
-    modelOptions: uniqueModels,
-    channelOptions: availableChannels,
+    handleModelChange,
+    // Options (Channel-First API)
+    channelOptions,
+    modelOptions,
     // Loading state
     channelsLoading,
     channelCount,

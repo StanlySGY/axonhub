@@ -23,9 +23,12 @@
       "noMessages": "No messages to retry"
     },
     "errors": {
-      "noChannelsAvailable": "No models available"
+      "noChannelsAvailable": "No channels available",
+      "noModelsForChannel": "No models available for this channel",
+      "selectChannelFirst": "Please select a channel first"
     },
     "modelsAvailable": "{{count}} models available across {{channels}} channels",
-    "channelsAvailable": "{{count}} channels available"
+    "channelsAvailable": "{{count}} channels available",
+    "modelsForChannel": "{{count}} models for this channel"
   }
 }

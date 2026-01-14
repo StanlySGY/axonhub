@@ -1,12 +1,6 @@
 import { useMemo, useCallback } from 'react';
 import { useQueryChannels } from '@/features/channels/data/channels';
 
-interface ChannelInfo {
-  id: string;
-  name: string;
-  orderingWeight: number;
-}
-
 export function useModelSelection() {
   const { data: channelsData, isLoading } = useQueryChannels({
     first: 100,
@@ -14,86 +8,53 @@ export function useModelSelection() {
     where: { statusIn: ['enabled', 'disabled'] },
   });
 
-  // Build model -> channels mapping
-  const modelChannelsMap = useMemo(() => {
-    if (!channelsData?.edges) return new Map<string, ChannelInfo[]>();
-
-    const map = new Map<string, ChannelInfo[]>();
-
-    channelsData.edges.forEach((edge) => {
-      const channelInfo: ChannelInfo = {
-        id: edge.node.id,
-        name: edge.node.name,
-        orderingWeight: edge.node.orderingWeight ?? 0,
-      };
-
-      edge.node.supportedModels.forEach((model) => {
-        const existing = map.get(model) || [];
-        existing.push(channelInfo);
-        map.set(model, existing);
-      });
-    });
-
-    // Sort channels by orderingWeight (DESC) for each model
-    map.forEach((channels, model) => {
-      channels.sort((a, b) => b.orderingWeight - a.orderingWeight);
-      map.set(model, channels);
-    });
-
-    return map;
+  // Channel options list (sorted by orderingWeight DESC)
+  const channelOptions = useMemo(() => {
+    if (!channelsData?.edges) return [];
+    return channelsData.edges.map((edge) => ({
+      value: edge.node.id,
+      label: edge.node.name,
+      supportedModels: edge.node.supportedModels,
+    }));
   }, [channelsData]);
 
-  // Unique models list (sorted alphabetically)
-  const uniqueModels = useMemo(() => {
-    const models = Array.from(modelChannelsMap.keys()).sort();
-    return models.map((model) => ({
-      value: model,
-      label: model,
-    }));
-  }, [modelChannelsMap]);
-
-  // Get channels for a specific model
-  const getChannelsForModel = useCallback(
-    (model: string): { value: string; label: string }[] => {
-      const channels = modelChannelsMap.get(model) || [];
-      return channels.map((ch) => ({
-        value: ch.id,
-        label: ch.name,
+  // Get models for a specific channel
+  const getModelsForChannel = useCallback(
+    (channelId: string): { value: string; label: string }[] => {
+      const channel = channelsData?.edges?.find((edge) => edge.node.id === channelId);
+      if (!channel) return [];
+      return channel.node.supportedModels.map((model) => ({
+        value: model,
+        label: model,
       }));
     },
-    [modelChannelsMap]
+    [channelsData]
   );
 
-  // Get default channel for a model (highest orderingWeight)
-  const getDefaultChannel = useCallback(
-    (model: string): string | null => {
-      const channels = modelChannelsMap.get(model);
-      if (!channels || channels.length === 0) return null;
-      return channels[0].id; // Already sorted by orderingWeight DESC
+  // Get default model for a channel (first model in the list)
+  const getDefaultModel = useCallback(
+    (channelId: string): string | null => {
+      const channel = channelsData?.edges?.find((edge) => edge.node.id === channelId);
+      if (!channel || channel.node.supportedModels.length === 0) return null;
+      return channel.node.supportedModels[0];
     },
-    [modelChannelsMap]
+    [channelsData]
   );
 
-  // Legacy: combined options for backward compatibility
-  const combinedOptions = useMemo(() => {
-    if (!channelsData?.edges) return [];
-    return channelsData.edges.flatMap((edge) =>
-      edge.node.supportedModels.map((model) => ({
-        value: `${edge.node.id}|${model}`,
-        label: `${edge.node.name} - ${model}`,
-      }))
-    );
+  // Get default channel (first channel, highest orderingWeight)
+  const getDefaultChannel = useCallback((): string | null => {
+    if (!channelsData?.edges || channelsData.edges.length === 0) return null;
+    return channelsData.edges[0].node.id;
   }, [channelsData]);
 
   const channelCount = channelsData?.edges?.length ?? 0;
 
   return {
-    // New API
-    uniqueModels,
-    getChannelsForModel,
+    // Channel-First API
+    channelOptions,
+    getModelsForChannel,
+    getDefaultModel,
     getDefaultChannel,
-    // Legacy API (backward compatibility)
-    combinedOptions,
     // Common
     isLoading,
     channelCount,

@@ -23,9 +23,12 @@
       "noMessages": "没有消息可重试"
     },
     "errors": {
-      "noChannelsAvailable": "没有可用的模型"
+      "noChannelsAvailable": "没有可用的渠道",
+      "noModelsForChannel": "该渠道没有可用的模型",
+      "selectChannelFirst": "请先选择渠道"
     },
     "modelsAvailable": "{{count}} 个模型可用，跨 {{channels}} 个渠道",
-    "channelsAvailable": "{{count}} 个渠道可用"
+    "channelsAvailable": "{{count}} 个渠道可用",
+    "modelsForChannel": "该渠道有 {{count}} 个模型"
   }
 }

@@ -30,20 +30,19 @@ export default function Playground() {
   const [input, setInput] = useState('');
 
   const {
-    model,
     selectedChannel,
+    model,
     temperature,
     maxTokens,
     systemPrompt,
     setTemperature,
     setMaxTokens,
     setSystemPrompt,
-    handleModelChange,
     handleChannelChange,
-    modelOptions,
+    handleModelChange,
     channelOptions,
+    modelOptions,
     channelsLoading,
-    channelCount,
     getSettings,
   } = usePlaygroundSettings();
 
@@ -185,6 +184,28 @@ export default function Playground() {
     <>
       <ScrollArea className='flex-1 p-4'>
         <div className='space-y-6'>
+          {/* Channel Selector (First) */}
+          <div className='space-y-3'>
+            <Label htmlFor='channel' className='text-xs font-semibold'>
+              {t('playground.settings.channel')}
+            </Label>
+            <AutoCompleteSelect
+              selectedValue={selectedChannel || ''}
+              onSelectedValueChange={(v) => handleChannelChange(v)}
+              items={channelOptions}
+              isLoading={channelsLoading}
+              emptyMessage={t('playground.errors.noChannelsAvailable')}
+              placeholder={channelsLoading ? t('loading') : t('playground.settings.selectChannel')}
+            />
+            {channelsLoading && <p className='text-muted-foreground text-[10px]'>{t('loading')}...</p>}
+            {!channelsLoading && channelOptions.length > 0 && (
+              <p className='text-muted-foreground text-[10px]'>
+                {t('playground.channelsAvailable', { count: channelOptions.length })}
+              </p>
+            )}
+          </div>
+
+          {/* Model Selector (Second, depends on channel) */}
           <div className='space-y-3'>
             <Label htmlFor='model' className='text-xs font-semibold'>
               {t('playground.settings.model')}
@@ -194,38 +215,15 @@ export default function Playground() {
               onSelectedValueChange={(v) => handleModelChange(v)}
               items={modelOptions}
               isLoading={channelsLoading}
-              emptyMessage={t('playground.errors.noChannelsAvailable')}
-              placeholder={channelsLoading ? t('loading') : t('playground.settings.selectModel')}
+              emptyMessage={selectedChannel ? t('playground.errors.noModelsForChannel') : t('playground.errors.selectChannelFirst')}
+              placeholder={t('playground.settings.selectModel')}
             />
-            {channelsLoading && <p className='text-muted-foreground text-[10px]'>{t('loading')}...</p>}
-            {!channelsLoading && modelOptions.length > 0 && (
+            {!channelsLoading && selectedChannel && modelOptions.length > 0 && (
               <p className='text-muted-foreground text-[10px]'>
-                {t('playground.modelsAvailable', {
-                  count: modelOptions.length,
-                  channels: channelCount,
-                })}
+                {t('playground.modelsForChannel', { count: modelOptions.length })}
               </p>
             )}
           </div>
-
-          {channelOptions.length > 1 && (
-            <div className='space-y-3'>
-              <Label htmlFor='channel' className='text-xs font-semibold'>
-                {t('playground.settings.channel')}
-              </Label>
-              <AutoCompleteSelect
-                selectedValue={selectedChannel || ''}
-                onSelectedValueChange={(v) => handleChannelChange(v)}
-                items={channelOptions}
-                isLoading={channelsLoading}
-                emptyMessage={t('playground.errors.noChannelsAvailable')}
-                placeholder={t('playground.settings.selectChannel')}
-              />
-              <p className='text-muted-foreground text-[10px]'>
-                {t('playground.channelsAvailable', { count: channelOptions.length })}
-              </p>
-            </div>
-          )}
 
           <div className='space-y-3'>
             <Label htmlFor='temperature' className='text-xs font-semibold'>
