@@ -63,7 +63,6 @@ func WithJWTAuth(auth *biz.AuthService) gin.HandlerFunc {
 			return
 		}
 
-		// 验证 JWT token
 		user, err := auth.AuthenticateJWTToken(c.Request.Context(), token)
 		if err != nil {
 			if errors.Is(err, biz.ErrInvalidJWT) {
@@ -76,6 +75,44 @@ func WithJWTAuth(auth *biz.AuthService) gin.HandlerFunc {
 		}
 
 		ctx := contexts.WithUser(c.Request.Context(), user)
+		c.Request = c.Request.WithContext(ctx)
+
+		c.Next()
+	}
+}
+
+// WithGeminiKeyAuth be compatible with Gemini query key authentication.
+// https://ai.google.dev/api/generate-content?hl=zh-cn#text_gen_text_only_prompt-SHELL
+func WithGeminiKeyAuth(auth *biz.AuthService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		key := c.Query("key")
+		if key == "" {
+			var err error
+
+			key, err = ExtractAPIKeyFromRequest(c.Request, nil)
+			if err != nil {
+				AbortWithError(c, http.StatusUnauthorized, err)
+				return
+			}
+		}
+
+		apiKey, err := auth.AnthenticateAPIKey(c.Request.Context(), key)
+		if err != nil {
+			if ent.IsNotFound(err) || errors.Is(err, biz.ErrInvalidAPIKey) {
+				AbortWithError(c, http.StatusUnauthorized, biz.ErrInvalidAPIKey)
+			} else {
+				AbortWithError(c, http.StatusInternalServerError, errors.New("Failed to validate API key"))
+			}
+
+			return
+		}
+
+		ctx := contexts.WithAPIKey(c.Request.Context(), apiKey)
+
+		if apiKey.Edges.Project != nil {
+			ctx = contexts.WithProjectID(ctx, apiKey.Edges.Project.ID)
+		}
+
 		c.Request = c.Request.WithContext(ctx)
 
 		c.Next()
