@@ -4,13 +4,55 @@ import { Copy, Eye } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { cn, extractNumberID } from '@/lib/utils';
+import { formatNumber } from '@/utils/format-number';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DataTableColumnHeader } from '@/components/data-table-column-header';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import LongText from '@/components/long-text';
 import { useApiKeysContext } from '../context/apikeys-context';
 import { ApiKey } from '../data/schema';
 import { DataTableRowActions } from './data-table-row-actions';
+import { useRequestsByAPIKey, useTokensByAPIKey } from '../../dashboard/data/dashboard';
+
+function UsageStatsCell({ apiKeyId }: { apiKeyId: string }) {
+  const { t } = useTranslation();
+  const { data: requestStats } = useRequestsByAPIKey();
+  const { data: tokenStats } = useTokensByAPIKey();
+
+  const requestCount = requestStats?.find((s) => s.apiKeyId === apiKeyId)?.count || 0;
+  const tokenData = tokenStats?.find((s) => s.apiKeyId === apiKeyId);
+  const totalTokens = tokenData?.totalTokens || 0;
+
+  if (requestCount === 0 && totalTokens === 0) {
+    return <div className='text-muted-foreground text-xs'>-</div>;
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div className='cursor-help space-y-0.5'>
+          <div className='text-xs font-medium'>{formatNumber(requestCount)} {t('apikeys.columns.requests')}</div>
+          <div className='text-muted-foreground text-xs'>{formatNumber(totalTokens)} {t('apikeys.columns.tokens')}</div>
+        </div>
+      </TooltipTrigger>
+      <TooltipContent side='top' className='text-xs'>
+        <div className='space-y-1'>
+          <div>{t('apikeys.columns.requestCount')}: {formatNumber(requestCount)}</div>
+          {tokenData && (
+            <>
+              <div>{t('apikeys.columns.inputTokens')}: {formatNumber(tokenData.inputTokens)}</div>
+              <div>{t('apikeys.columns.outputTokens')}: {formatNumber(tokenData.outputTokens)}</div>
+              {tokenData.cachedTokens > 0 && (
+                <div>{t('apikeys.columns.cachedTokens')}: {formatNumber(tokenData.cachedTokens)}</div>
+              )}
+            </>
+          )}
+        </div>
+      </TooltipContent>
+    </Tooltip>
+  );
+}
 
 function ApiKeyCell({ apiKey, fullApiKey }: { apiKey: string; fullApiKey: ApiKey }) {
   const { t } = useTranslation();
@@ -158,6 +200,13 @@ export const createColumns = (t: ReturnType<typeof useTranslation>['t'], canWrit
       return value.includes(row.getValue('status'));
     },
     enableSorting: false,
+  },
+  {
+    id: 'usage',
+    header: ({ column }) => <DataTableColumnHeader column={column} title={t('apikeys.columns.usage')} />,
+    cell: ({ row }) => <UsageStatsCell apiKeyId={row.original.id} />,
+    enableSorting: false,
+    enableHiding: true,
   },
   {
     accessorKey: 'createdAt',
