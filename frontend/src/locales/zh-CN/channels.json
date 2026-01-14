@@ -15,7 +15,13 @@
       "health": "健康状态",
       "healthTooltip": {
         "probeTime": "探测时间",
-        "successRate": "成功率"
+        "successRate": "成功率",
+        "overallRate": "总体成功率",
+        "totalRequests": "总请求数",
+        "trend": "趋势",
+        "trendUp": "上升",
+        "trendDown": "下降",
+        "trendStable": "稳定"
       },
       "tags": "标签",
       "baseURL": "Base URL",

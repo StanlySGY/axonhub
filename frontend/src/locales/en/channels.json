@@ -14,7 +14,13 @@
       "health": "Health",
       "healthTooltip": {
         "probeTime": "Probe Time",
-        "successRate": "Success Rate"
+        "successRate": "Success Rate",
+        "overallRate": "Overall Rate",
+        "totalRequests": "Total Requests",
+        "trend": "Trend",
+        "trendUp": "Improving",
+        "trendDown": "Declining",
+        "trendStable": "Stable"
       },
       "tags": "Tags",
       "baseURL": "Base URL",
