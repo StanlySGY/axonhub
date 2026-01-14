@@ -11059,6 +11059,7 @@ type RequestMutation struct {
 	addmetrics_latency_ms             *int64
 	metrics_first_token_latency_ms    *int64
 	addmetrics_first_token_latency_ms *int64
+	client_ip                         *string
 	clearedFields                     map[string]struct{}
 	api_key                           *int
 	clearedapi_key                    bool
@@ -12098,6 +12099,55 @@ func (m *RequestMutation) ResetMetricsFirstTokenLatencyMs() {
 	delete(m.clearedFields, request.FieldMetricsFirstTokenLatencyMs)
 }
 
+// SetClientIP sets the "client_ip" field.
+func (m *RequestMutation) SetClientIP(s string) {
+	m.client_ip = &s
+}
+
+// ClientIP returns the value of the "client_ip" field in the mutation.
+func (m *RequestMutation) ClientIP() (r string, exists bool) {
+	v := m.client_ip
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldClientIP returns the old "client_ip" field's value of the Request entity.
+// If the Request object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RequestMutation) OldClientIP(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldClientIP is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldClientIP requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldClientIP: %w", err)
+	}
+	return oldValue.ClientIP, nil
+}
+
+// ClearClientIP clears the value of the "client_ip" field.
+func (m *RequestMutation) ClearClientIP() {
+	m.client_ip = nil
+	m.clearedFields[request.FieldClientIP] = struct{}{}
+}
+
+// ClientIPCleared returns if the "client_ip" field was cleared in this mutation.
+func (m *RequestMutation) ClientIPCleared() bool {
+	_, ok := m.clearedFields[request.FieldClientIP]
+	return ok
+}
+
+// ResetClientIP resets all changes to the "client_ip" field.
+func (m *RequestMutation) ResetClientIP() {
+	m.client_ip = nil
+	delete(m.clearedFields, request.FieldClientIP)
+}
+
 // ClearAPIKey clears the "api_key" edge to the APIKey entity.
 func (m *RequestMutation) ClearAPIKey() {
 	m.clearedapi_key = true
@@ -12375,7 +12425,7 @@ func (m *RequestMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *RequestMutation) Fields() []string {
-	fields := make([]string, 0, 19)
+	fields := make([]string, 0, 20)
 	if m.created_at != nil {
 		fields = append(fields, request.FieldCreatedAt)
 	}
@@ -12433,6 +12483,9 @@ func (m *RequestMutation) Fields() []string {
 	if m.metrics_first_token_latency_ms != nil {
 		fields = append(fields, request.FieldMetricsFirstTokenLatencyMs)
 	}
+	if m.client_ip != nil {
+		fields = append(fields, request.FieldClientIP)
+	}
 	return fields
 }
 
@@ -12479,6 +12532,8 @@ func (m *RequestMutation) Field(name string) (ent.Value, bool) {
 		return m.MetricsLatencyMs()
 	case request.FieldMetricsFirstTokenLatencyMs:
 		return m.MetricsFirstTokenLatencyMs()
+	case request.FieldClientIP:
+		return m.ClientIP()
 	}
 	return nil, false
 }
@@ -12526,6 +12581,8 @@ func (m *RequestMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldMetricsLatencyMs(ctx)
 	case request.FieldMetricsFirstTokenLatencyMs:
 		return m.OldMetricsFirstTokenLatencyMs(ctx)
+	case request.FieldClientIP:
+		return m.OldClientIP(ctx)
 	}
 	return nil, fmt.Errorf("unknown Request field %s", name)
 }
@@ -12668,6 +12725,13 @@ func (m *RequestMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetMetricsFirstTokenLatencyMs(v)
 		return nil
+	case request.FieldClientIP:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetClientIP(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Request field %s", name)
 }
@@ -12755,6 +12819,9 @@ func (m *RequestMutation) ClearedFields() []string {
 	if m.FieldCleared(request.FieldMetricsFirstTokenLatencyMs) {
 		fields = append(fields, request.FieldMetricsFirstTokenLatencyMs)
 	}
+	if m.FieldCleared(request.FieldClientIP) {
+		fields = append(fields, request.FieldClientIP)
+	}
 	return fields
 }
 
@@ -12798,6 +12865,9 @@ func (m *RequestMutation) ClearField(name string) error {
 		return nil
 	case request.FieldMetricsFirstTokenLatencyMs:
 		m.ClearMetricsFirstTokenLatencyMs()
+		return nil
+	case request.FieldClientIP:
+		m.ClearClientIP()
 		return nil
 	}
 	return fmt.Errorf("unknown Request nullable field %s", name)
@@ -12863,6 +12933,9 @@ func (m *RequestMutation) ResetField(name string) error {
 		return nil
 	case request.FieldMetricsFirstTokenLatencyMs:
 		m.ResetMetricsFirstTokenLatencyMs()
+		return nil
+	case request.FieldClientIP:
+		m.ResetClientIP()
 		return nil
 	}
 	return fmt.Errorf("unknown Request field %s", name)

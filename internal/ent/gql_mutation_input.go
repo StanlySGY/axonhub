@@ -644,6 +644,7 @@ type CreateRequestInput struct {
 	Stream                     *bool
 	MetricsLatencyMs           *int64
 	MetricsFirstTokenLatencyMs *int64
+	ClientIP                   *string
 	APIKeyID                   *int
 	ProjectID                  int
 	TraceID                    *int
@@ -684,6 +685,9 @@ func (i *CreateRequestInput) Mutate(m *RequestMutation) {
 	}
 	if v := i.MetricsFirstTokenLatencyMs; v != nil {
 		m.SetMetricsFirstTokenLatencyMs(*v)
+	}
+	if v := i.ClientIP; v != nil {
+		m.SetClientIP(*v)
 	}
 	if v := i.APIKeyID; v != nil {
 		m.SetAPIKeyID(*v)

@@ -31,7 +31,8 @@
       "retryProcess": "重试过程",
       "mappedModel": "映射模型",
       "executionCount": "执行次数",
-      "executionCountTooltip": "此请求共执行 {{count}} 次（含重试）"
+      "executionCountTooltip": "此请求共执行 {{count}} 次（含重试）",
+      "clientIP": "客户端IP"
     },
     "status": {
       "pending": "等待中",

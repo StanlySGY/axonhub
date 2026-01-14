@@ -225,6 +225,20 @@ export function useRequestsColumns(): ColumnDef<Request>[] {
       enableHiding: true,
     },
     {
+      id: 'clientIP',
+      accessorKey: 'clientIP',
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('requests.columns.clientIP')} />,
+      enableSorting: false,
+      cell: ({ row }) => {
+        const clientIP = row.original.clientIP;
+        if (!clientIP) {
+          return <div className='text-muted-foreground text-xs'>-</div>;
+        }
+        return <div className='font-mono text-xs'>{clientIP}</div>;
+      },
+      enableHiding: true,
+    },
+    {
       id: 'executionCount',
       accessorKey: 'executionCount',
       header: ({ column }) => <DataTableColumnHeader column={column} title={t('requests.columns.executionCount')} />,

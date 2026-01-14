@@ -62,6 +62,8 @@ type Request struct {
 	MetricsLatencyMs *int64 `json:"metrics_latency_ms,omitempty"`
 	// MetricsFirstTokenLatencyMs holds the value of the "metrics_first_token_latency_ms" field.
 	MetricsFirstTokenLatencyMs *int64 `json:"metrics_first_token_latency_ms,omitempty"`
+	// ClientIP holds the value of the "client_ip" field.
+	ClientIP string `json:"client_ip,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the RequestQuery when eager-loading is set.
 	Edges        RequestEdges `json:"edges"`
@@ -178,7 +180,7 @@ func (*Request) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case request.FieldID, request.FieldAPIKeyID, request.FieldProjectID, request.FieldTraceID, request.FieldDataStorageID, request.FieldChannelID, request.FieldMetricsLatencyMs, request.FieldMetricsFirstTokenLatencyMs:
 			values[i] = new(sql.NullInt64)
-		case request.FieldSource, request.FieldModelID, request.FieldFormat, request.FieldExternalID, request.FieldStatus:
+		case request.FieldSource, request.FieldModelID, request.FieldFormat, request.FieldExternalID, request.FieldStatus, request.FieldClientIP:
 			values[i] = new(sql.NullString)
 		case request.FieldCreatedAt, request.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -327,6 +329,12 @@ func (_m *Request) assignValues(columns []string, values []any) error {
 				_m.MetricsFirstTokenLatencyMs = new(int64)
 				*_m.MetricsFirstTokenLatencyMs = value.Int64
 			}
+		case request.FieldClientIP:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field client_ip", values[i])
+			} else if value.Valid {
+				_m.ClientIP = value.String
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -458,6 +466,9 @@ func (_m *Request) String() string {
 		builder.WriteString("metrics_first_token_latency_ms=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
+	builder.WriteString(", ")
+	builder.WriteString("client_ip=")
+	builder.WriteString(_m.ClientIP)
 	builder.WriteByte(')')
 	return builder.String()
 }

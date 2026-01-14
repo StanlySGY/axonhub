@@ -42,6 +42,9 @@ type Request struct {
 	// TransformerMetadata stores transformer-specific metadata for preserving format during transformations.
 	// This supports any type of value for flexibility.
 	TransformerMetadata map[string]any `json:"-"`
+
+	// ClientIP is the client IP address.
+	ClientIP string `json:"-"`
 }
 
 // AuthConfig represents authentication configuration.

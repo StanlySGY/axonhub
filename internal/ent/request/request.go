@@ -56,6 +56,8 @@ const (
 	FieldMetricsLatencyMs = "metrics_latency_ms"
 	// FieldMetricsFirstTokenLatencyMs holds the string denoting the metrics_first_token_latency_ms field in the database.
 	FieldMetricsFirstTokenLatencyMs = "metrics_first_token_latency_ms"
+	// FieldClientIP holds the string denoting the client_ip field in the database.
+	FieldClientIP = "client_ip"
 	// EdgeAPIKey holds the string denoting the api_key edge name in mutations.
 	EdgeAPIKey = "api_key"
 	// EdgeProject holds the string denoting the project edge name in mutations.
@@ -145,6 +147,7 @@ var Columns = []string{
 	FieldStream,
 	FieldMetricsLatencyMs,
 	FieldMetricsFirstTokenLatencyMs,
+	FieldClientIP,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -177,6 +180,8 @@ var (
 	DefaultFormat string
 	// DefaultStream holds the default value on creation for the "stream" field.
 	DefaultStream bool
+	// DefaultClientIP holds the default value on creation for the "client_ip" field.
+	DefaultClientIP string
 )
 
 // Source defines the type for the "source" enum field.
@@ -313,6 +318,11 @@ func ByMetricsLatencyMs(opts ...sql.OrderTermOption) OrderOption {
 // ByMetricsFirstTokenLatencyMs orders the results by the metrics_first_token_latency_ms field.
 func ByMetricsFirstTokenLatencyMs(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldMetricsFirstTokenLatencyMs, opts...).ToFunc()
+}
+
+// ByClientIP orders the results by the client_ip field.
+func ByClientIP(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldClientIP, opts...).ToFunc()
 }
 
 // ByAPIKeyField orders the results by api_key field.

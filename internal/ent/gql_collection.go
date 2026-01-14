@@ -3169,6 +3169,11 @@ func (_q *RequestQuery) collectField(ctx context.Context, oneNode bool, opCtx *g
 				selectedFields = append(selectedFields, request.FieldMetricsFirstTokenLatencyMs)
 				fieldSeen[request.FieldMetricsFirstTokenLatencyMs] = struct{}{}
 			}
+		case "clientIP":
+			if _, ok := fieldSeen[request.FieldClientIP]; !ok {
+				selectedFields = append(selectedFields, request.FieldClientIP)
+				fieldSeen[request.FieldClientIP] = struct{}{}
+			}
 		case "id":
 		case "__typename":
 		default:

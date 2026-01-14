@@ -54,6 +54,9 @@ func (handlers *ChatCompletionHandlers) ChatCompletion(c *gin.Context) {
 		return
 	}
 
+	// Set client IP
+	genericReq.ClientIP = c.ClientIP()
+
 	// log.Debug(ctx, "Chat completion request", log.Any("request", genericReq))
 
 	result, err := handlers.ChatCompletionOrchestrator.Process(ctx, genericReq)

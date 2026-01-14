@@ -281,6 +281,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			request.FieldStream:                     {Type: field.TypeBool, Column: request.FieldStream},
 			request.FieldMetricsLatencyMs:           {Type: field.TypeInt64, Column: request.FieldMetricsLatencyMs},
 			request.FieldMetricsFirstTokenLatencyMs: {Type: field.TypeInt64, Column: request.FieldMetricsFirstTokenLatencyMs},
+			request.FieldClientIP:                   {Type: field.TypeString, Column: request.FieldClientIP},
 		},
 	}
 	graph.Nodes[10] = &sqlgraph.Node{
@@ -2458,6 +2459,11 @@ func (f *RequestFilter) WhereMetricsLatencyMs(p entql.Int64P) {
 // WhereMetricsFirstTokenLatencyMs applies the entql int64 predicate on the metrics_first_token_latency_ms field.
 func (f *RequestFilter) WhereMetricsFirstTokenLatencyMs(p entql.Int64P) {
 	f.Where(p.Field(request.FieldMetricsFirstTokenLatencyMs))
+}
+
+// WhereClientIP applies the entql string predicate on the client_ip field.
+func (f *RequestFilter) WhereClientIP(p entql.StringP) {
+	f.Where(p.Field(request.FieldClientIP))
 }
 
 // WhereHasAPIKey applies a predicate to check if query has an edge api_key.

@@ -1499,6 +1499,7 @@ input CreateRequestInput {
   stream: Boolean
   metricsLatencyMs: Int
   metricsFirstTokenLatencyMs: Int
+  clientIP: String
   apiKeyID: ID
   projectID: ID!
   traceID: ID
@@ -3438,6 +3439,7 @@ type Request implements Node {
   stream: Boolean!
   metricsLatencyMs: Int
   metricsFirstTokenLatencyMs: Int
+  clientIP: String
   apiKey: APIKey
   project: Project!
   trace: Trace
@@ -4042,6 +4044,24 @@ input RequestWhereInput {
   metricsFirstTokenLatencyMsLTE: Int
   metricsFirstTokenLatencyMsIsNil: Boolean
   metricsFirstTokenLatencyMsNotNil: Boolean
+  """
+  client_ip field predicates
+  """
+  clientIP: String
+  clientIPNEQ: String
+  clientIPIn: [String!]
+  clientIPNotIn: [String!]
+  clientIPGT: String
+  clientIPGTE: String
+  clientIPLT: String
+  clientIPLTE: String
+  clientIPContains: String
+  clientIPHasPrefix: String
+  clientIPHasSuffix: String
+  clientIPIsNil: Boolean
+  clientIPNotNil: Boolean
+  clientIPEqualFold: String
+  clientIPContainsFold: String
   """
   api_key edge predicates
   """

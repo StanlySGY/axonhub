@@ -31,7 +31,8 @@
       "retryProcess": "Retry Process",
       "mappedModel": "Mapped Model",
       "executionCount": "Executions",
-      "executionCountTooltip": "This request was executed {{count}} times (including retries)"
+      "executionCountTooltip": "This request was executed {{count}} times (including retries)",
+      "clientIP": "Client IP"
     },
     "status": {
       "pending": "Pending",

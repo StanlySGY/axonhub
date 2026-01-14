@@ -95,6 +95,8 @@ func (Request) Fields() []ent.Field {
 		field.Int64("metrics_latency_ms").Optional().Nillable(),
 		// First token latency in milliseconds (only for streaming requests)
 		field.Int64("metrics_first_token_latency_ms").Optional().Nillable(),
+		// Client IP address
+		field.String("client_ip").Optional().Immutable().Default(""),
 	}
 }
 

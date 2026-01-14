@@ -793,6 +793,7 @@ type ComplexityRoot struct {
 		APIKeyID                   func(childComplexity int) int
 		Channel                    func(childComplexity int) int
 		ChannelID                  func(childComplexity int) int
+		ClientIP                   func(childComplexity int) int
 		CreatedAt                  func(childComplexity int) int
 		DataStorage                func(childComplexity int) int
 		DataStorageID              func(childComplexity int) int
@@ -4953,6 +4954,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Request.ChannelID(childComplexity), true
+	case "Request.clientIP":
+		if e.complexity.Request.ClientIP == nil {
+			break
+		}
+
+		return e.complexity.Request.ClientIP(childComplexity), true
 	case "Request.createdAt":
 		if e.complexity.Request.CreatedAt == nil {
 			break
@@ -27562,6 +27569,35 @@ func (ec *executionContext) fieldContext_Request_metricsFirstTokenLatencyMs(_ co
 	return fc, nil
 }
 
+func (ec *executionContext) _Request_clientIP(ctx context.Context, field graphql.CollectedField, obj *ent.Request) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Request_clientIP,
+		func(ctx context.Context) (any, error) {
+			return obj.ClientIP, nil
+		},
+		nil,
+		ec.marshalOString2string,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Request_clientIP(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Request",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Request_apiKey(ctx context.Context, field graphql.CollectedField, obj *ent.Request) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -28171,6 +28207,8 @@ func (ec *executionContext) fieldContext_RequestEdge_node(_ context.Context, fie
 				return ec.fieldContext_Request_metricsLatencyMs(ctx, field)
 			case "metricsFirstTokenLatencyMs":
 				return ec.fieldContext_Request_metricsFirstTokenLatencyMs(ctx, field)
+			case "clientIP":
+				return ec.fieldContext_Request_clientIP(ctx, field)
 			case "apiKey":
 				return ec.fieldContext_Request_apiKey(ctx, field)
 			case "project":
@@ -28838,6 +28876,8 @@ func (ec *executionContext) fieldContext_RequestExecution_request(_ context.Cont
 				return ec.fieldContext_Request_metricsLatencyMs(ctx, field)
 			case "metricsFirstTokenLatencyMs":
 				return ec.fieldContext_Request_metricsFirstTokenLatencyMs(ctx, field)
+			case "clientIP":
+				return ec.fieldContext_Request_clientIP(ctx, field)
 			case "apiKey":
 				return ec.fieldContext_Request_apiKey(ctx, field)
 			case "project":
@@ -35368,6 +35408,8 @@ func (ec *executionContext) fieldContext_UsageLog_request(_ context.Context, fie
 				return ec.fieldContext_Request_metricsLatencyMs(ctx, field)
 			case "metricsFirstTokenLatencyMs":
 				return ec.fieldContext_Request_metricsFirstTokenLatencyMs(ctx, field)
+			case "clientIP":
+				return ec.fieldContext_Request_clientIP(ctx, field)
 			case "apiKey":
 				return ec.fieldContext_Request_apiKey(ctx, field)
 			case "project":
@@ -44958,7 +45000,7 @@ func (ec *executionContext) unmarshalInputCreateRequestInput(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"source", "modelID", "format", "requestHeaders", "requestBody", "responseBody", "responseChunks", "externalID", "status", "stream", "metricsLatencyMs", "metricsFirstTokenLatencyMs", "apiKeyID", "projectID", "traceID", "dataStorageID", "channelID"}
+	fieldsInOrder := [...]string{"source", "modelID", "format", "requestHeaders", "requestBody", "responseBody", "responseChunks", "externalID", "status", "stream", "metricsLatencyMs", "metricsFirstTokenLatencyMs", "clientIP", "apiKeyID", "projectID", "traceID", "dataStorageID", "channelID"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -45049,6 +45091,13 @@ func (ec *executionContext) unmarshalInputCreateRequestInput(ctx context.Context
 				return it, err
 			}
 			it.MetricsFirstTokenLatencyMs = data
+		case "clientIP":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("clientIP"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ClientIP = data
 		case "apiKeyID":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("apiKeyID"))
 			data, err := ec.unmarshalOID2ᚖgithubᚗcomᚋloopljᚋaxonhubᚋinternalᚋobjectsᚐGUID(ctx, v)
@@ -50904,7 +50953,7 @@ func (ec *executionContext) unmarshalInputRequestWhereInput(ctx context.Context,
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"not", "and", "or", "id", "idNEQ", "idIn", "idNotIn", "idGT", "idGTE", "idLT", "idLTE", "createdAt", "createdAtNEQ", "createdAtIn", "createdAtNotIn", "createdAtGT", "createdAtGTE", "createdAtLT", "createdAtLTE", "updatedAt", "updatedAtNEQ", "updatedAtIn", "updatedAtNotIn", "updatedAtGT", "updatedAtGTE", "updatedAtLT", "updatedAtLTE", "apiKeyID", "apiKeyIDNEQ", "apiKeyIDIn", "apiKeyIDNotIn", "apiKeyIDIsNil", "apiKeyIDNotNil", "projectID", "projectIDNEQ", "projectIDIn", "projectIDNotIn", "traceID", "traceIDNEQ", "traceIDIn", "traceIDNotIn", "traceIDIsNil", "traceIDNotNil", "dataStorageID", "dataStorageIDNEQ", "dataStorageIDIn", "dataStorageIDNotIn", "dataStorageIDIsNil", "dataStorageIDNotNil", "source", "sourceNEQ", "sourceIn", "sourceNotIn", "modelID", "modelIDNEQ", "modelIDIn", "modelIDNotIn", "modelIDGT", "modelIDGTE", "modelIDLT", "modelIDLTE", "modelIDContains", "modelIDHasPrefix", "modelIDHasSuffix", "modelIDEqualFold", "modelIDContainsFold", "format", "formatNEQ", "formatIn", "formatNotIn", "formatGT", "formatGTE", "formatLT", "formatLTE", "formatContains", "formatHasPrefix", "formatHasSuffix", "formatEqualFold", "formatContainsFold", "channelID", "channelIDNEQ", "channelIDIn", "channelIDNotIn", "channelIDIsNil", "channelIDNotNil", "externalID", "externalIDNEQ", "externalIDIn", "externalIDNotIn", "externalIDGT", "externalIDGTE", "externalIDLT", "externalIDLTE", "externalIDContains", "externalIDHasPrefix", "externalIDHasSuffix", "externalIDIsNil", "externalIDNotNil", "externalIDEqualFold", "externalIDContainsFold", "status", "statusNEQ", "statusIn", "statusNotIn", "stream", "streamNEQ", "metricsLatencyMs", "metricsLatencyMsNEQ", "metricsLatencyMsIn", "metricsLatencyMsNotIn", "metricsLatencyMsGT", "metricsLatencyMsGTE", "metricsLatencyMsLT", "metricsLatencyMsLTE", "metricsLatencyMsIsNil", "metricsLatencyMsNotNil", "metricsFirstTokenLatencyMs", "metricsFirstTokenLatencyMsNEQ", "metricsFirstTokenLatencyMsIn", "metricsFirstTokenLatencyMsNotIn", "metricsFirstTokenLatencyMsGT", "metricsFirstTokenLatencyMsGTE", "metricsFirstTokenLatencyMsLT", "metricsFirstTokenLatencyMsLTE", "metricsFirstTokenLatencyMsIsNil", "metricsFirstTokenLatencyMsNotNil", "hasAPIKey", "hasAPIKeyWith", "hasProject", "hasProjectWith", "hasTrace", "hasTraceWith", "hasDataStorage", "hasDataStorageWith", "hasExecutions", "hasExecutionsWith", "hasChannel", "hasChannelWith", "hasUsageLogs", "hasUsageLogsWith"}
+	fieldsInOrder := [...]string{"not", "and", "or", "id", "idNEQ", "idIn", "idNotIn", "idGT", "idGTE", "idLT", "idLTE", "createdAt", "createdAtNEQ", "createdAtIn", "createdAtNotIn", "createdAtGT", "createdAtGTE", "createdAtLT", "createdAtLTE", "updatedAt", "updatedAtNEQ", "updatedAtIn", "updatedAtNotIn", "updatedAtGT", "updatedAtGTE", "updatedAtLT", "updatedAtLTE", "apiKeyID", "apiKeyIDNEQ", "apiKeyIDIn", "apiKeyIDNotIn", "apiKeyIDIsNil", "apiKeyIDNotNil", "projectID", "projectIDNEQ", "projectIDIn", "projectIDNotIn", "traceID", "traceIDNEQ", "traceIDIn", "traceIDNotIn", "traceIDIsNil", "traceIDNotNil", "dataStorageID", "dataStorageIDNEQ", "dataStorageIDIn", "dataStorageIDNotIn", "dataStorageIDIsNil", "dataStorageIDNotNil", "source", "sourceNEQ", "sourceIn", "sourceNotIn", "modelID", "modelIDNEQ", "modelIDIn", "modelIDNotIn", "modelIDGT", "modelIDGTE", "modelIDLT", "modelIDLTE", "modelIDContains", "modelIDHasPrefix", "modelIDHasSuffix", "modelIDEqualFold", "modelIDContainsFold", "format", "formatNEQ", "formatIn", "formatNotIn", "formatGT", "formatGTE", "formatLT", "formatLTE", "formatContains", "formatHasPrefix", "formatHasSuffix", "formatEqualFold", "formatContainsFold", "channelID", "channelIDNEQ", "channelIDIn", "channelIDNotIn", "channelIDIsNil", "channelIDNotNil", "externalID", "externalIDNEQ", "externalIDIn", "externalIDNotIn", "externalIDGT", "externalIDGTE", "externalIDLT", "externalIDLTE", "externalIDContains", "externalIDHasPrefix", "externalIDHasSuffix", "externalIDIsNil", "externalIDNotNil", "externalIDEqualFold", "externalIDContainsFold", "status", "statusNEQ", "statusIn", "statusNotIn", "stream", "streamNEQ", "metricsLatencyMs", "metricsLatencyMsNEQ", "metricsLatencyMsIn", "metricsLatencyMsNotIn", "metricsLatencyMsGT", "metricsLatencyMsGTE", "metricsLatencyMsLT", "metricsLatencyMsLTE", "metricsLatencyMsIsNil", "metricsLatencyMsNotNil", "metricsFirstTokenLatencyMs", "metricsFirstTokenLatencyMsNEQ", "metricsFirstTokenLatencyMsIn", "metricsFirstTokenLatencyMsNotIn", "metricsFirstTokenLatencyMsGT", "metricsFirstTokenLatencyMsGTE", "metricsFirstTokenLatencyMsLT", "metricsFirstTokenLatencyMsLTE", "metricsFirstTokenLatencyMsIsNil", "metricsFirstTokenLatencyMsNotNil", "clientIP", "clientIPNEQ", "clientIPIn", "clientIPNotIn", "clientIPGT", "clientIPGTE", "clientIPLT", "clientIPLTE", "clientIPContains", "clientIPHasPrefix", "clientIPHasSuffix", "clientIPIsNil", "clientIPNotNil", "clientIPEqualFold", "clientIPContainsFold", "hasAPIKey", "hasAPIKeyWith", "hasProject", "hasProjectWith", "hasTrace", "hasTraceWith", "hasDataStorage", "hasDataStorageWith", "hasExecutions", "hasExecutionsWith", "hasChannel", "hasChannelWith", "hasUsageLogs", "hasUsageLogsWith"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -51905,6 +51954,111 @@ func (ec *executionContext) unmarshalInputRequestWhereInput(ctx context.Context,
 				return it, err
 			}
 			it.MetricsFirstTokenLatencyMsNotNil = data
+		case "clientIP":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("clientIP"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ClientIP = data
+		case "clientIPNEQ":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("clientIPNEQ"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ClientIPNEQ = data
+		case "clientIPIn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("clientIPIn"))
+			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ClientIPIn = data
+		case "clientIPNotIn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("clientIPNotIn"))
+			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ClientIPNotIn = data
+		case "clientIPGT":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("clientIPGT"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ClientIPGT = data
+		case "clientIPGTE":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("clientIPGTE"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ClientIPGTE = data
+		case "clientIPLT":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("clientIPLT"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ClientIPLT = data
+		case "clientIPLTE":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("clientIPLTE"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ClientIPLTE = data
+		case "clientIPContains":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("clientIPContains"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ClientIPContains = data
+		case "clientIPHasPrefix":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("clientIPHasPrefix"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ClientIPHasPrefix = data
+		case "clientIPHasSuffix":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("clientIPHasSuffix"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ClientIPHasSuffix = data
+		case "clientIPIsNil":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("clientIPIsNil"))
+			data, err := ec.unmarshalOBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ClientIPIsNil = data
+		case "clientIPNotNil":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("clientIPNotNil"))
+			data, err := ec.unmarshalOBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ClientIPNotNil = data
+		case "clientIPEqualFold":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("clientIPEqualFold"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ClientIPEqualFold = data
+		case "clientIPContainsFold":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("clientIPContainsFold"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ClientIPContainsFold = data
 		case "hasAPIKey":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasAPIKey"))
 			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
@@ -66388,6 +66542,8 @@ func (ec *executionContext) _Request(ctx context.Context, sel ast.SelectionSet, 
 			out.Values[i] = ec._Request_metricsLatencyMs(ctx, field, obj)
 		case "metricsFirstTokenLatencyMs":
 			out.Values[i] = ec._Request_metricsFirstTokenLatencyMs(ctx, field, obj)
+		case "clientIP":
+			out.Values[i] = ec._Request_clientIP(ctx, field, obj)
 		case "apiKey":
 			field := field
 

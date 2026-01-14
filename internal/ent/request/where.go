@@ -120,6 +120,11 @@ func MetricsFirstTokenLatencyMs(v int64) predicate.Request {
 	return predicate.Request(sql.FieldEQ(FieldMetricsFirstTokenLatencyMs, v))
 }
 
+// ClientIP applies equality check predicate on the "client_ip" field. It's identical to ClientIPEQ.
+func ClientIP(v string) predicate.Request {
+	return predicate.Request(sql.FieldEQ(FieldClientIP, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Request {
 	return predicate.Request(sql.FieldEQ(FieldCreatedAt, v))
@@ -723,6 +728,81 @@ func MetricsFirstTokenLatencyMsIsNil() predicate.Request {
 // MetricsFirstTokenLatencyMsNotNil applies the NotNil predicate on the "metrics_first_token_latency_ms" field.
 func MetricsFirstTokenLatencyMsNotNil() predicate.Request {
 	return predicate.Request(sql.FieldNotNull(FieldMetricsFirstTokenLatencyMs))
+}
+
+// ClientIPEQ applies the EQ predicate on the "client_ip" field.
+func ClientIPEQ(v string) predicate.Request {
+	return predicate.Request(sql.FieldEQ(FieldClientIP, v))
+}
+
+// ClientIPNEQ applies the NEQ predicate on the "client_ip" field.
+func ClientIPNEQ(v string) predicate.Request {
+	return predicate.Request(sql.FieldNEQ(FieldClientIP, v))
+}
+
+// ClientIPIn applies the In predicate on the "client_ip" field.
+func ClientIPIn(vs ...string) predicate.Request {
+	return predicate.Request(sql.FieldIn(FieldClientIP, vs...))
+}
+
+// ClientIPNotIn applies the NotIn predicate on the "client_ip" field.
+func ClientIPNotIn(vs ...string) predicate.Request {
+	return predicate.Request(sql.FieldNotIn(FieldClientIP, vs...))
+}
+
+// ClientIPGT applies the GT predicate on the "client_ip" field.
+func ClientIPGT(v string) predicate.Request {
+	return predicate.Request(sql.FieldGT(FieldClientIP, v))
+}
+
+// ClientIPGTE applies the GTE predicate on the "client_ip" field.
+func ClientIPGTE(v string) predicate.Request {
+	return predicate.Request(sql.FieldGTE(FieldClientIP, v))
+}
+
+// ClientIPLT applies the LT predicate on the "client_ip" field.
+func ClientIPLT(v string) predicate.Request {
+	return predicate.Request(sql.FieldLT(FieldClientIP, v))
+}
+
+// ClientIPLTE applies the LTE predicate on the "client_ip" field.
+func ClientIPLTE(v string) predicate.Request {
+	return predicate.Request(sql.FieldLTE(FieldClientIP, v))
+}
+
+// ClientIPContains applies the Contains predicate on the "client_ip" field.
+func ClientIPContains(v string) predicate.Request {
+	return predicate.Request(sql.FieldContains(FieldClientIP, v))
+}
+
+// ClientIPHasPrefix applies the HasPrefix predicate on the "client_ip" field.
+func ClientIPHasPrefix(v string) predicate.Request {
+	return predicate.Request(sql.FieldHasPrefix(FieldClientIP, v))
+}
+
+// ClientIPHasSuffix applies the HasSuffix predicate on the "client_ip" field.
+func ClientIPHasSuffix(v string) predicate.Request {
+	return predicate.Request(sql.FieldHasSuffix(FieldClientIP, v))
+}
+
+// ClientIPIsNil applies the IsNil predicate on the "client_ip" field.
+func ClientIPIsNil() predicate.Request {
+	return predicate.Request(sql.FieldIsNull(FieldClientIP))
+}
+
+// ClientIPNotNil applies the NotNil predicate on the "client_ip" field.
+func ClientIPNotNil() predicate.Request {
+	return predicate.Request(sql.FieldNotNull(FieldClientIP))
+}
+
+// ClientIPEqualFold applies the EqualFold predicate on the "client_ip" field.
+func ClientIPEqualFold(v string) predicate.Request {
+	return predicate.Request(sql.FieldEqualFold(FieldClientIP, v))
+}
+
+// ClientIPContainsFold applies the ContainsFold predicate on the "client_ip" field.
+func ClientIPContainsFold(v string) predicate.Request {
+	return predicate.Request(sql.FieldContainsFold(FieldClientIP, v))
 }
 
 // HasAPIKey applies the HasEdge predicate on the "api_key" edge.

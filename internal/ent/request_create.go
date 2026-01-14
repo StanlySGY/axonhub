@@ -248,6 +248,20 @@ func (_c *RequestCreate) SetNillableMetricsFirstTokenLatencyMs(v *int64) *Reques
 	return _c
 }
 
+// SetClientIP sets the "client_ip" field.
+func (_c *RequestCreate) SetClientIP(v string) *RequestCreate {
+	_c.mutation.SetClientIP(v)
+	return _c
+}
+
+// SetNillableClientIP sets the "client_ip" field if the given value is not nil.
+func (_c *RequestCreate) SetNillableClientIP(v *string) *RequestCreate {
+	if v != nil {
+		_c.SetClientIP(*v)
+	}
+	return _c
+}
+
 // SetAPIKey sets the "api_key" edge to the APIKey entity.
 func (_c *RequestCreate) SetAPIKey(v *APIKey) *RequestCreate {
 	return _c.SetAPIKeyID(v.ID)
@@ -369,6 +383,10 @@ func (_c *RequestCreate) defaults() error {
 	if _, ok := _c.mutation.Stream(); !ok {
 		v := request.DefaultStream
 		_c.mutation.SetStream(v)
+	}
+	if _, ok := _c.mutation.ClientIP(); !ok {
+		v := request.DefaultClientIP
+		_c.mutation.SetClientIP(v)
 	}
 	return nil
 }
@@ -497,6 +515,10 @@ func (_c *RequestCreate) createSpec() (*Request, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.MetricsFirstTokenLatencyMs(); ok {
 		_spec.SetField(request.FieldMetricsFirstTokenLatencyMs, field.TypeInt64, value)
 		_node.MetricsFirstTokenLatencyMs = &value
+	}
+	if value, ok := _c.mutation.ClientIP(); ok {
+		_spec.SetField(request.FieldClientIP, field.TypeString, value)
+		_node.ClientIP = value
 	}
 	if nodes := _c.mutation.APIKeyIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -869,6 +891,9 @@ func (u *RequestUpsertOne) UpdateNewValues() *RequestUpsertOne {
 		}
 		if _, exists := u.create.mutation.Stream(); exists {
 			s.SetIgnore(request.FieldStream)
+		}
+		if _, exists := u.create.mutation.ClientIP(); exists {
+			s.SetIgnore(request.FieldClientIP)
 		}
 	}))
 	return u
@@ -1295,6 +1320,9 @@ func (u *RequestUpsertBulk) UpdateNewValues() *RequestUpsertBulk {
 			}
 			if _, exists := b.mutation.Stream(); exists {
 				s.SetIgnore(request.FieldStream)
+			}
+			if _, exists := b.mutation.ClientIP(); exists {
+				s.SetIgnore(request.FieldClientIP)
 			}
 		}
 	}))

@@ -168,7 +168,8 @@ func (s *RequestService) CreateRequest(
 		SetSource(contexts.GetSourceOrDefault(ctx, request.SourceAPI)).
 		SetStatus(request.StatusProcessing).
 		SetStream(isStream).
-		SetRequestHeaders(requestHeadersBytes)
+		SetRequestHeaders(requestHeadersBytes).
+		SetClientIP(httpRequest.ClientIP)
 
 	// Determine if we should store in database or external storage
 	useExternalStorage := storeRequestBody && s.shouldUseExternalStorage(ctx, dataStorage)

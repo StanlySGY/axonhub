@@ -426,6 +426,9 @@ func (_u *RequestUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.MetricsFirstTokenLatencyMsCleared() {
 		_spec.ClearField(request.FieldMetricsFirstTokenLatencyMs, field.TypeInt64)
 	}
+	if _u.mutation.ClientIPCleared() {
+		_spec.ClearField(request.FieldClientIP, field.TypeString)
+	}
 	if _u.mutation.ExecutionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -988,6 +991,9 @@ func (_u *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err er
 	}
 	if _u.mutation.MetricsFirstTokenLatencyMsCleared() {
 		_spec.ClearField(request.FieldMetricsFirstTokenLatencyMs, field.TypeInt64)
+	}
+	if _u.mutation.ClientIPCleared() {
+		_spec.ClearField(request.FieldClientIP, field.TypeString)
 	}
 	if _u.mutation.ExecutionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
